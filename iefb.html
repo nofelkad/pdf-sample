@@ -1,0 +1,1621 @@
+<title>IEPF Recovery Schema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+/* ============================================================
+   Tokens — complete light palette on bare :root
+   Neutrals carry a cool blue bias toward the verdigris accent.
+   ============================================================ */
+:root {
+  --ground:        #EEF2F4;
+  --surface:       #FFFFFF;
+  --surface-sunk:  #E4EAEE;
+  --rule:          #D2DBE1;
+  --rule-soft:     #E2E9ED;
+  --ink:           #101720;
+  --ink-2:         #3C4B58;
+  --ink-3:         #647484;
+  --ink-4:         #8B9BA8;
+  --accent:        #0E6B5B;
+  --accent-soft:   #DCEDE8;
+  --accent-ink:    #0A5147;
+  --ochre:         #8A5A11;
+  --ochre-soft:    #F5E9D3;
+  --crimson:       #8F2A2A;
+  --crimson-soft:  #F6E3E1;
+  --code-bg:       #F4F7F8;
+  --code-ink:      #1B2A33;
+  --shadow:        0 1px 2px rgba(16,23,32,.05), 0 8px 24px -12px rgba(16,23,32,.16);
+  --rail:          280px;
+
+  --f-display: "Bitter", "Georgia", serif;
+  --f-body:    "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:        #0B1015;
+    --surface:       #131A21;
+    --surface-sunk:  #0E151B;
+    --rule:          #26313A;
+    --rule-soft:     #1C252D;
+    --ink:           #DEE7ED;
+    --ink-2:         #AEBECA;
+    --ink-3:         #8496A4;
+    --ink-4:         #64757F;
+    --accent:        #46BFA6;
+    --accent-soft:   #12332E;
+    --accent-ink:    #7ED9C4;
+    --ochre:         #D8A45C;
+    --ochre-soft:    #33270F;
+    --crimson:       #E08079;
+    --crimson-soft:  #351B1A;
+    --code-bg:       #0E151B;
+    --code-ink:      #C8D6E0;
+    --shadow:        0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:        #0B1015;
+  --surface:       #131A21;
+  --surface-sunk:  #0E151B;
+  --rule:          #26313A;
+  --rule-soft:     #1C252D;
+  --ink:           #DEE7ED;
+  --ink-2:         #AEBECA;
+  --ink-3:         #8496A4;
+  --ink-4:         #64757F;
+  --accent:        #46BFA6;
+  --accent-soft:   #12332E;
+  --accent-ink:    #7ED9C4;
+  --ochre:         #D8A45C;
+  --ochre-soft:    #33270F;
+  --crimson:       #E08079;
+  --crimson-soft:  #351B1A;
+  --code-bg:       #0E151B;
+  --code-ink:      #C8D6E0;
+  --shadow:        0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16.5px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- shell ---------- */
+.shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
+
+/* ---------- left rail ---------- */
+.rail {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--rule);
+  background: var(--surface-sunk);
+}
+.rail-head { padding: 26px 22px 16px; border-bottom: 1px solid var(--rule); }
+.rail-kicker {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent); margin: 0 0 6px;
+}
+.rail-title {
+  font-family: var(--f-display); font-weight: 700; font-size: 17px;
+  line-height: 1.25; margin: 0; color: var(--ink);
+}
+.rail-sub { font-size: 12.5px; color: var(--ink-3); margin: 6px 0 0; }
+.nav { overflow-y: auto; padding: 10px 10px 28px; flex: 1; }
+.nav-item {
+  display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: baseline;
+  padding: 6px 10px; border-radius: 4px; text-decoration: none;
+  color: var(--ink-2); font-size: 13.5px; line-height: 1.35;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { background: var(--surface); color: var(--ink); }
+.nav-letter {
+  font-family: var(--f-mono); font-size: 11px; font-weight: 600;
+  color: var(--ink-4); letter-spacing: .04em;
+}
+.nav-item.active {
+  background: var(--surface); color: var(--ink); border-left-color: var(--accent);
+  font-weight: 600;
+}
+.nav-item.active .nav-letter { color: var(--accent); }
+.nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ---------- main ---------- */
+main { min-width: 0; padding: 0 0 96px; }
+.wrap { max-width: 940px; padding: 0 44px; margin: 0 auto; }
+
+/* ---------- hero ---------- */
+.hero { padding: 66px 0 38px; }
+.eyebrow {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--accent); margin: 0 0 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.eyebrow::after { content: ""; height: 1px; flex: 1; background: var(--rule); }
+h1 {
+  font-family: var(--f-display); font-weight: 700; font-size: clamp(30px, 4.1vw, 45px);
+  line-height: 1.1; letter-spacing: -.015em; margin: 0 0 16px;
+  text-wrap: balance; color: var(--ink);
+}
+.dek { font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 60ch; margin: 0; }
+.meta {
+  margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px 26px;
+  font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-3);
+}
+.meta b { color: var(--ink-2); font-weight: 600; }
+
+/* ---------- facts strip ---------- */
+.facts-band {
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+.facts {
+  max-width: 940px; margin: 0 auto; padding: 0 44px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+}
+.fact {
+  padding: 20px 20px 20px 0; display: flex; flex-direction: column; gap: 3px;
+  border-left: 1px solid var(--rule-soft); padding-left: 18px;
+}
+.fact:first-child { border-left: 0; padding-left: 0; }
+.fact-n {
+  font-family: var(--f-display); font-weight: 700; font-size: 25px;
+  color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1;
+}
+.fact-l { font-size: 12px; color: var(--ink-3); line-height: 1.35; }
+
+/* ---------- sections ---------- */
+.sec { padding: 52px 0 8px; scroll-margin-top: 12px; }
+.sec + .sec { border-top: 1px solid var(--rule-soft); }
+.sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.sec-letter {
+  font-family: var(--f-mono); font-size: 12px; font-weight: 600; letter-spacing: .06em;
+  color: var(--accent); background: var(--accent-soft);
+  width: 30px; height: 30px; flex: 0 0 30px; border-radius: 3px;
+  display: grid; place-items: center; margin-top: 4px;
+}
+.sec h2 {
+  font-family: var(--f-display); font-weight: 700; font-size: clamp(22px, 2.6vw, 29px);
+  line-height: 1.2; letter-spacing: -.01em; margin: 0; text-wrap: balance;
+}
+h3 {
+  font-family: var(--f-display); font-weight: 600; font-size: 19px;
+  margin: 40px 0 12px; color: var(--ink); letter-spacing: -.005em;
+  padding-bottom: 7px; border-bottom: 1px solid var(--rule-soft);
+}
+h4 {
+  font-family: var(--f-body); font-weight: 700; font-size: 15px; margin: 28px 0 8px;
+  color: var(--ink-2); letter-spacing: .01em;
+}
+p { margin: 0 0 15px; max-width: 74ch; }
+a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+strong { font-weight: 700; color: var(--ink); }
+em { font-style: italic; color: var(--ink-2); }
+
+ul, ol { margin: 0 0 18px; padding-left: 22px; max-width: 74ch; }
+li { margin-bottom: 8px; }
+li::marker { color: var(--ink-4); font-variant-numeric: tabular-nums; }
+ol > li::marker { font-family: var(--f-mono); font-size: 12.5px; }
+
+/* ---------- chips ---------- */
+.chip {
+  display: inline-block; font-family: var(--f-mono); font-size: 9.5px;
+  letter-spacing: .09em; text-transform: uppercase; font-weight: 600;
+  padding: 2px 6px; border-radius: 3px; vertical-align: 1.5px; white-space: nowrap;
+}
+.chip-obs { background: var(--accent-soft); color: var(--accent-ink); }
+.chip-asm { background: var(--ochre-soft); color: var(--ochre); }
+
+/* ---------- callout ---------- */
+.callout {
+  margin: 0 0 24px; padding: 18px 22px; background: var(--surface);
+  border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+  border-radius: 3px; font-size: 15.5px; color: var(--ink-2); box-shadow: var(--shadow);
+}
+.callout .chip { vertical-align: 1px; }
+
+/* ---------- tables ---------- */
+.table-wrap {
+  margin: 0 0 26px; overflow-x: auto; background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 4px; box-shadow: var(--shadow);
+}
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+thead th {
+  position: sticky; top: 0; background: var(--surface-sunk);
+  font-family: var(--f-mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3);
+  text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 11px 14px; border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top; color: var(--ink-2); line-height: 1.5;
+}
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--code-bg); }
+tbody td:first-child { color: var(--ink); font-weight: 600; }
+tbody td code { font-size: 12px; }
+
+/* ---------- code ---------- */
+code {
+  font-family: var(--f-mono); font-size: .875em; background: var(--code-bg);
+  color: var(--code-ink); padding: 1.5px 5px; border-radius: 3px;
+  border: 1px solid var(--rule-soft); word-break: break-word;
+}
+.codeblock {
+  margin: 0 0 26px; background: var(--code-bg); border: 1px solid var(--rule);
+  border-radius: 4px; overflow: hidden; box-shadow: var(--shadow);
+}
+.code-bar {
+  display: flex; align-items: center; gap: 14px; padding: 8px 12px;
+  background: var(--surface-sunk); border-bottom: 1px solid var(--rule);
+}
+.code-lang {
+  font-family: var(--f-mono); font-size: 10px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent);
+}
+.code-lines {
+  font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-4);
+  margin-right: auto; font-variant-numeric: tabular-nums;
+}
+.code-copy, .code-expand {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3); background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 3px; padding: 4px 9px;
+  cursor: pointer; transition: color .15s, border-color .15s;
+}
+.code-copy:hover, .code-expand:hover { color: var(--accent); border-color: var(--accent); }
+.code-copy:focus-visible, .code-expand:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.code-scroll { overflow-x: auto; }
+.codeblock pre {
+  margin: 0; padding: 16px 18px; font-family: var(--f-mono);
+  font-size: 12.5px; line-height: 1.65; color: var(--code-ink);
+}
+.codeblock.is-tall { position: relative; }
+.codeblock.is-tall .code-scroll { max-height: 460px; overflow-y: auto; }
+.codeblock.is-tall::after {
+  content: ""; position: absolute; left: 1px; right: 1px; bottom: 37px; height: 56px;
+  background: linear-gradient(to bottom, transparent, var(--code-bg));
+  pointer-events: none;
+}
+.codeblock.is-tall.open::after { display: none; }
+.codeblock.is-tall.open .code-scroll { max-height: none; }
+.code-expand {
+  display: block; width: 100%; border: 0; border-top: 1px solid var(--rule);
+  border-radius: 0; padding: 9px; background: var(--surface-sunk);
+}
+
+/* ---------- diagram ---------- */
+.diagram {
+  margin: 0 0 28px; padding: 0; background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 4px; box-shadow: var(--shadow);
+}
+.diagram-scroll { overflow-x: auto; padding: 22px 18px 8px; }
+.diagram figcaption {
+  font-size: 12.5px; color: var(--ink-3); padding: 12px 20px 16px;
+  border-top: 1px solid var(--rule-soft); line-height: 1.5;
+}
+pre.mermaid { margin: 0; text-align: center; }
+
+/* ---------- footer ---------- */
+.foot {
+  margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--rule);
+  font-size: 13px; color: var(--ink-3);
+}
+.foot p { max-width: 74ch; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail {
+    position: static; height: auto; border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav {
+    display: flex; flex-wrap: wrap; gap: 4px; max-height: 168px; padding: 12px;
+  }
+  .nav-item { grid-template-columns: auto; border-left: 0; border-bottom: 2px solid transparent; }
+  .nav-item .nav-text { display: none; }
+  .nav-item .nav-letter { font-size: 13px; }
+  .nav-item.active { border-left: 0; border-bottom-color: var(--accent); }
+  .wrap { padding: 0 22px; }
+  .facts { padding: 0 22px; gap: 0 20px; }
+  .fact, .fact:first-child {
+    border-left: 0; padding-left: 0; padding-right: 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .fact:first-child, .fact:nth-child(2) { border-top: 0; }
+  .hero { padding-top: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="shell">
+  <aside class="rail">
+    <div class="rail-head">
+      <p class="rail-kicker">Module 1 &middot; Schema Design</p>
+      <p class="rail-title">IEPF Recovery Schema</p>
+      <p class="rail-sub">PostgreSQL 16 &middot; verified against 5,000 sample rows</p>
+    </div>
+    <nav class="nav" aria-label="Document sections">
+      <a class="nav-item" href="#sec-a"><span class="nav-letter">A</span><span class="nav-text">Executive Summary</span></a>
+<a class="nav-item" href="#sec-b"><span class="nav-letter">B</span><span class="nav-text">Excel Data Analysis</span></a>
+<a class="nav-item" href="#sec-c"><span class="nav-letter">C</span><span class="nav-text">Entity Model</span></a>
+<a class="nav-item" href="#sec-d"><span class="nav-letter">D</span><span class="nav-text">Table-by-Table Design</span></a>
+<a class="nav-item" href="#sec-e"><span class="nav-letter">E</span><span class="nav-text">Tenant Architecture</span></a>
+<a class="nav-item" href="#sec-f"><span class="nav-letter">F</span><span class="nav-text">Audit Strategy</span></a>
+<a class="nav-item" href="#sec-g"><span class="nav-letter">G</span><span class="nav-text">Search Architecture</span></a>
+<a class="nav-item" href="#sec-h"><span class="nav-letter">H</span><span class="nav-text">Analytics Architecture</span></a>
+<a class="nav-item" href="#sec-i"><span class="nav-letter">I</span><span class="nav-text">Index Strategy (consolidated)</span></a>
+<a class="nav-item" href="#sec-j"><span class="nav-letter">J</span><span class="nav-text">Partitioning Strategy</span></a>
+<a class="nav-item" href="#sec-k"><span class="nav-letter">K</span><span class="nav-text">Security</span></a>
+<a class="nav-item" href="#sec-l"><span class="nav-letter">L</span><span class="nav-text">Data Quality — issues found and their handling</span></a>
+<a class="nav-item" href="#sec-m"><span class="nav-letter">M</span><span class="nav-text">PostgreSQL DDL</span></a>
+<a class="nav-item" href="#sec-n"><span class="nav-letter">N</span><span class="nav-text">Example Queries</span></a>
+<a class="nav-item" href="#sec-o"><span class="nav-letter">O</span><span class="nav-text">Migration From Excel</span></a>
+<a class="nav-item" href="#sec-p"><span class="nav-letter">P</span><span class="nav-text">Scalability Roadmap</span></a>
+<a class="nav-item" href="#sec-q"><span class="nav-letter">Q</span><span class="nav-text">Risks and Trade-offs (explicit)</span></a>
+<a class="nav-item" href="#sec-r"><span class="nav-letter">R</span><span class="nav-text">Final Recommendation</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="wrap">
+      <div class="hero">
+        <p class="eyebrow">Enterprise database design</p>
+        <h1>Unclaimed investment records, modelled for ten years of service</h1>
+        <p class="dek">A production PostgreSQL schema for the IEPF shareholder-recovery workflow &mdash;
+          derived from the Module&nbsp;1 intake template, tested end to end against its own sample data.</p>
+        <div class="meta">
+          <span><b>Prepared</b> 25 August 2026</span>
+          <span><b>Source</b> Module 1 Sample data &amp; Columns.xlsx</span>
+          <span><b>Target</b> PostgreSQL 16+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="facts-band"><div class="facts">
+      <div class="fact"><span class="fact-n">5,000</span><span class="fact-l">sample rows analysed</span></div>
+<div class="fact"><span class="fact-n">61</span><span class="fact-l">template columns</span></div>
+<div class="fact"><span class="fact-n">17</span><span class="fact-l">tables designed</span></div>
+<div class="fact"><span class="fact-n">11</span><span class="fact-l">columns derived, not stored</span></div>
+<div class="fact"><span class="fact-n">0</span><span class="fact-l">valuation mismatches</span></div>
+<div class="fact"><span class="fact-n">16.13</span><span class="fact-l">PostgreSQL verified on</span></div>
+    </div></div>
+
+    <div class="wrap">
+      <blockquote class="callout">Every schema object in this document was executed and smoke-tested against PostgreSQL 16.13: the full DDL ran cleanly, all 5,000 sample rows were loaded through the staging pipeline, RLS isolation was verified with two tenants, and the search indexes were confirmed in query plans. Claims below marked <span class="chip chip-obs">observed</span> are facts measured programmatically in the workbook; claims marked <span class="chip chip-asm">assumption</span> are stated design assumptions.</blockquote>
+<section id="sec-a" class="sec"><header class="sec-head"><span class="sec-letter">A</span><h2>Executive Summary</h2></header>
+<p>The workbook is the intake-and-tracking template for an <strong>unclaimed investment recovery operation</strong> (IEPF domain, India): lists of shareholders of listed companies (Tata Chemicals, Reliance, Infosys, …) whose dividends/shares are unclaimed or transferred to the Investor Education and Protection Fund, enriched with market valuations and worked through a claim-recovery workflow (data cleansing → calling → KYC → filing → claimed).</p>
+<p>The recommended design is deliberately the <strong>simplest architecture that meets all stated requirements</strong>, with explicit evolution points:</p>
+<ol><li><strong>Single PostgreSQL cluster, shared schema multi-tenancy</strong> — every tenant-owned table carries <code>tenant_id</code> and is protected by <strong>forced Row-Level Security</strong> with fail-closed session context. Composite foreign keys <code>(tenant_id, id)</code> make cross-tenant references impossible at the constraint level, not just the policy level.</li><li><strong>One core entity</strong> — <code>app.shareholder_record</code>, one row per (company, folio/demat account) — surrounded by a small set of supporting entities: <code>tenant</code>, <code>app_user</code>, <code>company</code>, <code>import_batch</code>, <code>record_joint_holder</code>, <code>record_activity</code>. The Excel's 61 columns do <strong>not</strong> become 61 columns: 11 of them are derived values that are never stored (market values, concatenated names, totals, counts, "address available"), 4 are file-level facts normalized into <code>import_batch</code>, and repeating groups (joint holders, call/cleaning/validation events) become child tables.</li><li><strong>Shared reference layer</strong> (<code>reference</code> schema, no tenant_id): geography (country/state/district/pincode directory used for the required auto-fill enrichment), the securities master with <strong>weekly price history</strong> (<code>security_price</code> — the "update every Saturday night" feed, fetched once for all tenants), and controlled vocabularies (investment types, record statuses) as lookup tables rather than PostgreSQL enums.</li><li><strong>Market value is computed, never stored.</strong> Verified against the sample: the Excel's own <code>Market Value</code> column matches <code>dividend_shares × share_price</code> in 5,000/5,000 rows; storing it would create a value that silently goes stale every Saturday. A <code>security_invoker</code> view derives it from the latest price; a materialized view serves aggregate dashboards.</li><li><strong>Search on PostgreSQL alone</strong> — <code>pg_trgm</code> GIN indexes for fuzzy/partial name and address search, a generated <code>tsvector</code> for multi-token search, tenant-prefixed B-tree indexes for filters (status, state, pincode, dates), and keyset pagination on <code>(display name, id)</code>. An external search engine is not justified at this scale and the thresholds that would change that are stated in §G.</li><li><strong>Analytics on the same cluster initially</strong> — tenant-filtered materialized views refreshed after the weekly price sync and after imports, with a read replica as the first scaling step and a warehouse only at Phase 3 volumes.</li><li><strong>Auditability as a first-class requirement</strong> — <code>created/updated/deleted _at/_by</code> + <code>row_version</code> (optimistic locking) on mutable business tables, an append-only field-level diff log (<code>audit.record_change</code>) on the core entity, an append-only operational timeline (<code>record_activity</code>) replacing the single-value "Date of Calling / remarks" columns, and immutable raw source fields preserved alongside cleansed values.</li><li><strong>PII is treated seriously</strong>: names, addresses, DOB, PAN are PII; <strong>Aadhaar is never stored in clear</strong> (application-layer encryption + last-4 only), PAN is format-checked and access-restricted, and role separation (<code>app_rw</code>, <code>app_ro</code>, <code>svc_import</code>, <code>svc_price_loader</code>, <code>platform_admin</code>) enforces least privilege.</li></ol>
+<p><strong>Most important decisions at a glance</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Decision</th><th>Choice</th><th>Main alternative rejected</th><th>Why</th></tr></thead><tbody><tr><td>Tenancy</td><td>Shared schema + <code>tenant_id</code> + forced RLS</td><td>Schema-per-tenant</td><td>Thousands of tenants operable with one migration path; RLS + composite FKs give provable isolation</td></tr><tr><td>Core grain</td><td>One row per (company, folio/demat)</td><td>One row per investor person</td><td>No reliable person identifier in data (PAN 0% populated); identity resolution is a downstream feature</td></tr><tr><td>Market value</td><td>Derived via price history</td><td>Stored column</td><td>Verified derivable 100%; stored copy goes stale weekly; history explains past valuations</td></tr><tr><td>Dropdowns</td><td>Lookup/reference tables</td><td>PostgreSQL enums</td><td>MCA vocabularies grow; labels are user-facing; no <code>ALTER TYPE</code> migrations in hot paths</td></tr><tr><td>Search</td><td>PostgreSQL (<code>pg_trgm</code> + FTS)</td><td>OpenSearch</td><td>Sufficient below ~50M rows / moderate QPS; thresholds documented</td></tr><tr><td>Partitioning</td><td>None now; design is partition-ready</td><td>Partition day one</td><td>5K sample rows; concrete triggers defined (§J)</td></tr></tbody></table></div>
+</section>
+<section id="sec-b" class="sec"><header class="sec-head"><span class="sec-letter">B</span><h2>Excel Data Analysis</h2></header>
+<h3 id="b-1-workbook-structure">B.1 Workbook structure</h3>
+<div class="table-wrap"><table><thead><tr><th>Sheet</th><th>Purpose</th><th>Shape</th></tr></thead><tbody><tr><td><code>Sample Data</code></td><td>5,000 example records, headers in row 2, columns B–AM (38 business columns)</td><td>The intake file as prepared by the analysis ("BI") team</td></tr><tr><td><code>Column Details</code></td><td>The template contract: 61 columns (A–BI) with requirement notes (row 7), compulsory/optional/system-filled flags (row 12), and cell formats (row 13)</td><td>Defines the full lifecycle — 23 columns beyond the intake file cover cleansing, validation, calling, and status tracking</td></tr></tbody></table></div>
+<p>The <code>Column Details</code> sheet is the more complete specification: it shows the intake columns <strong>plus</strong> the downstream workflow columns (<code>Updated *</code> cleansed fields, <code>Status of Shares</code>, IEPF/Non-IEPF/Suspense share buckets, joint holders, <code>Date of Calling</code>, validation remarks, <code>Updated Market Value</code>). The database must model the full lifecycle, not just the intake file.</p>
+<h3 id="b-2-business-purpose-and-entity-identification">B.2 Business purpose and entity identification</h3>
+<p>Each row is an <strong>unclaimed holding record</strong>: a shareholder of a listed company identified by folio number (physical holdings) or DP/Client ID (demat), with the number of shares whose dividends are unclaimed, a classification (IEPF / Non IEPF / Suspense), a market valuation, and a recovery-workflow status. The likely operator is a recovery/claims service processing many companies' registers — 9 companies appear in the sample <span class="chip chip-obs">observed</span>.</p>
+<h3 id="b-3-column-by-column-findings-facts-measured-across-all-5-000-rows">B.3 Column-by-column findings (facts measured across all 5,000 rows)</h3>
+<p><strong>Identifiers and keys</strong></p>
+<ul><li><code>Unique Code</code> (e.g. <code>TCL0000000TC001</code>): <span class="chip chip-obs">observed</span> in 5,000/5,000 rows it is exactly <code>3-letter company prefix + zero padding + folio number</code>, 16 chars. It is a <em>derived</em> duplicate-detection key, not an independent fact. The template also specifies a separate "System generated code … don't make this code by using any column" — i.e. a true surrogate key. → Surrogate UUID primary key; the natural key becomes a <strong>unique constraint on (tenant, company, folio)</strong>; the legacy code is retained as <code>record_code</code> for reconciliation.</li><li><code>Folio Number</code>: <span class="chip chip-obs">observed</span> unique per company (0 duplicates); template says "system should check duplication of folio no by individual company". Alphanumeric → <code>text</code>.</li><li><code>DP Id-Client Id-Account Number</code>: 0% populated in the sample but defined ("normally start with 16 digit"). Physical vs demat holdings → <strong>at least one of folio/DP must be present</strong> (CHECK constraint).</li><li><code>Folio/Demat No</code>: <span class="chip chip-obs">observed</span> always identical to <code>Folio Number</code> where DP is empty — a coalesce, i.e. <strong>derived → generated column</strong>, not entered data.</li><li><code>Sr No</code>: <span class="chip chip-obs">observed</span> contiguous 1–5,000 — a physical file row number. Belongs in staging (<code>source_row_number</code>) for error reporting, <strong>not</strong> in the business table.</li></ul>
+<p><strong>Names</strong></p>
+<ul><li><code>Investor Full Name</code> and <code>Father Full Name</code>: <span class="chip chip-obs">observed</span> exact whitespace-normalized concatenations of their three parts in 5,000/5,000 rows (the template even includes the <code>TRIM(CONCAT(...))</code> formula) → <strong>derived → generated columns</strong>.</li><li><code>Father Full Name</code> contains <strong>1,624 empty strings vs NULL</strong> in the remainder <span class="chip chip-obs">observed</span> — an empty-string/NULL inconsistency the schema resolves (<code>NULLIF</code> on load, generated column emits NULL).</li><li>First name is compulsory ("no data accepted if this column is blank") → <code>NOT NULL</code> + non-blank CHECK. Middle/last/father parts optional; template warns of junk tokens (<code>0</code>, <code>#N/A</code>, <code>Not available</code>) — none present in this sample <span class="chip chip-obs">observed</span>, but the cleansing rules stay in the pipeline.</li><li>All names are ALL-CAPS register text; the template's <code>Updated *</code> columns apply <code>PROPER(TRIM(...))</code> → separate <code>cleaned_full_name</code> / <code>cleaned_father_husband_name</code> columns, system-filled, with the raw parts preserved.</li></ul>
+<p><strong>Address and geography</strong></p>
+<ul><li><code>Address</code> is a single free-text blob (max 169 chars observed). <span class="chip chip-obs">observed</span> 4,785/5,000 values carry leading/trailing whitespace; 94 contain letter-O-for-zero corruption in embedded pincodes ("BOMBAY 4OOO56"); many embed the pincode/city that also appear in dedicated columns.</li><li><code>Country</code> 100% populated (14 values); <code>State</code> 99% (only Indian rows); <code>District</code> <strong>0% populated</strong> but required by the template's enrichment rules ("blank details automatically filled by system as per pincode"); <code>Pin Code</code> 100% but <span class="chip chip-obs">observed</span> all 49 non-India rows carry the sentinel <code>999999</code> — a fake value that must become NULL on load.</li><li><code>Pin Code</code> arrived as a number — safe for Indian PINs (never start with 0) but wrong as a general type (foreign postal codes, leading zeros) → <code>text</code>.</li><li>→ Raw address block preserved verbatim (<code>address_raw</code>, <code>country_raw</code>, …) + cleansed block (<code>cleaned_address</code>, <code>locality</code>, <code>cleaned_pincode</code>) + FKs into a shared geo reference (<code>country</code>/<code>state</code>/<code>district</code>/<code>postal_index</code>) that powers the required pincode auto-fill.</li></ul>
+<p><strong>Holdings, dividends, valuation</strong></p>
+<ul><li><code>Dividend Count No</code>: integers 1–7 <span class="chip chip-obs">observed</span> — number of unclaimed dividend distributions. <code>smallint</code>.</li><li><code>Final No Shares (Dividend)</code> vs <code>Final No of Shares (Shareholder)</code>: equal in 4,953/5,000 rows, different in 47 <span class="chip chip-obs">observed</span> — two distinct facts; both kept.</li><li><code>Shares Type</code>: exactly <code>{IEPF, Non IEPF}</code> in the sample; template adds <code>Suspense</code>. <span class="chip chip-obs">observed</span> perfectly correlated with dividend count (6–7 → IEPF), matching the batch remark "IEPF Count taken as 6 &amp; 7". It is a classification <em>decided at preparation time</em> under a rule that can change → stored, CHECK-constrained.</li><li><code>Share Price</code>: <span class="chip chip-obs">observed</span> a single value (747) for all 9 companies — clearly placeholder data. The template requirement is the real design driver: <em>"will link to latest share price of NSE/BSE, and system will update the price every Saturday night"</em> → a shared <strong>price history table</strong>, one feed for all tenants.</li><li><code>Market Value</code>: <span class="chip chip-obs">observed</span> equals <code>Final No Shares (Dividend) × Share Price</code> in <strong>5,000/5,000</strong> rows — while the written definition says "(Shareholder) × price" (matches only 4,953). A contradiction between spec and data, and the strongest argument for <strong>not storing it</strong>: derive it from one authoritative formula (flagged as an open question, §Q).</li><li><code>Updated Market Value</code> = <code>Total no of shares × price</code> per the template → also derived.</li><li><code>IEPF</code>/<code>Non IEPF</code>/<code>Suspense</code> share counts (user-verified breakdown) + <code>Total No of shares</code> = "sum of the above" → three stored columns + a <strong>generated</strong> total.</li></ul>
+<p><strong>Dates, flags, workflow</strong></p>
+<ul><li><code>Proposed Date of transfer to IEPF</code>: 7 distinct dates 2018–2024 <span class="chip chip-obs">observed</span>, September each year (matching IEPF's 7-year rule cadence). <code>date</code>.</li><li><code>Date of Preparation</code> and <code>Remarks (From BI)</code>: <span class="chip chip-obs">observed</span> single value repeated on all 5,000 rows — <strong>file-level facts → <code>import_batch</code></strong>, not per-row columns.</li><li><code>Address Available (Yes/No)</code>: <span class="chip chip-obs">observed</span> constant "Yes"; fully derivable from the address column → <strong>not stored</strong> (derived in the read view).</li><li>Litigation / unpaid-suspense flags: defined Yes/No, 0% populated → nullable <code>boolean</code> (NULL = not yet assessed).</li><li><code>Status of Shares</code>: 7-value dropdown ("if shares are claimed all further columns should be blank") → lookup table + status-change history; a terminal-state flag models the "claimed" rule.</li><li><code>Date of Calling</code>, <code>Data Cleaning Remarks</code>, <code>Data Validation Remarks</code>: single-value columns that in reality are <strong>repeating events</strong> (a record is called more than once) → append-only <code>record_activity</code> table.</li><li><code>Joint Holder 1</code>, <code>Joint Holder 2</code>, <code>Count of Joint Holder</code>: a classic repeating group capped at 2 by the spreadsheet → child table <code>record_joint_holder</code>; the count is derived.</li></ul>
+<p><strong>PII (0% populated in the sample but defined in the template):</strong> <code>PAN</code>, <code>Date of Birth</code>, <code>Aadhar Number</code>, <code>Nominee Name</code>. See §K.3 — Aadhaar gets special treatment (never stored in clear).</p>
+<h3 id="b-4-columns-that-must-not-be-stored-as-entered">B.4 Columns that must NOT be stored as entered</h3>
+<div class="table-wrap"><table><thead><tr><th>Excel column</th><th>Why not stored</th><th>Replacement</th></tr></thead><tbody><tr><td>Unique Code</td><td>Derived from company prefix + folio</td><td>UNIQUE (tenant, company, folio); legacy value kept as <code>record_code</code> for reconciliation</td></tr><tr><td>Investor Full Name, Father Full Name</td><td>Exact concatenations (verified 100%)</td><td><code>GENERATED ALWAYS AS … STORED</code></td></tr><tr><td>Folio/Demat No</td><td>Coalesce of two columns</td><td>Generated column</td></tr><tr><td>Address Available</td><td>Derivable from address</td><td>Derived in read view</td></tr><tr><td>Market Value, Updated Market Value</td><td>Shares × latest price; goes stale weekly</td><td><code>app.v_record_valuation</code> view + analytics MV</td></tr><tr><td>Total No of shares</td><td>Sum of three buckets</td><td>Generated column</td></tr><tr><td>Count of Joint Holder</td><td>COUNT of child rows</td><td>Derived in read view</td></tr><tr><td>Sr No</td><td>File row position</td><td><code>staging.source_row_number</code> only</td></tr><tr><td>Date of Preparation, BI Remarks</td><td>File-level, repeated 5,000×</td><td><code>import_batch.prepared_on</code>, <code>.analysis_remarks</code></td></tr><tr><td>Share Price</td><td>A property of the security on a date, not of the record</td><td><code>reference.security_price</code> history</td></tr></tbody></table></div>
+</section>
+<section id="sec-c" class="sec"><header class="sec-head"><span class="sec-letter">C</span><h2>Entity Model</h2></header>
+<h3 id="c-1-entities-and-why-they-exist">C.1 Entities and why they exist</h3>
+<div class="table-wrap"><table><thead><tr><th>Entity</th><th>Kind</th><th>Business concept</th></tr></thead><tbody><tr><td><code>app.tenant</code></td><td>Core</td><td>A client organization of the platform. Root of all isolation.</td></tr><tr><td><code>app.app_user</code></td><td>Supporting</td><td>People and per-tenant service accounts; the target of every <code>*_by</code> audit column.</td></tr><tr><td><code>app.company</code></td><td>Core</td><td>A tenant's registration of a listed company they process (their label + short code); links to the shared security master.</td></tr><tr><td><code>reference.security</code></td><td>Reference</td><td>The listed security itself (ISIN, NSE/BSE symbols) — a public fact, shared by all tenants.</td></tr><tr><td><code>reference.security_price</code></td><td>Reference (time series)</td><td>Weekly close-price history; the Saturday-night sync target; the source of every market value.</td></tr><tr><td><code>app.import_batch</code></td><td>Transactional</td><td>One uploaded file: preparation date, dividend window, analysis remarks, row counts, idempotency hash.</td></tr><tr><td><code>app.shareholder_record</code></td><td><strong>Core (the grain)</strong></td><td>One unclaimed holding: (company, folio/demat) with holder identity, address, holding facts, workflow status.</td></tr><tr><td><code>app.record_joint_holder</code></td><td>Child</td><td>Joint holders (repeating group, 0..n per record).</td></tr><tr><td><code>app.record_activity</code></td><td>Transactional (append-only)</td><td>Calls, cleansing runs, validation notes, status changes — the operational timeline.</td></tr><tr><td><code>reference.country/state/district/postal_index</code></td><td>Reference</td><td>Government geo lists; <code>postal_index</code> drives pincode → state/district/locality auto-fill.</td></tr><tr><td><code>reference.investment_type</code>, <code>reference.record_status</code></td><td>Lookup</td><td>MCA investment categories; workflow status vocabulary.</td></tr><tr><td><code>staging.shareholder_record_raw</code></td><td>Staging</td><td>All-text landing zone for imports; carries validation outcomes.</td></tr><tr><td><code>audit.record_change</code></td><td>Audit</td><td>Field-level diff history of the core entity.</td></tr></tbody></table></div>
+<p><strong>Relationships and cardinality</strong></p>
+<ul><li>tenant 1—N app_user, company, import_batch, shareholder_record (all tenant-owned tables).</li><li>company 1—N import_batch 1—N shareholder_record (a record belongs to exactly one company; batch membership is kept for lineage).</li><li>reference.security 1—N reference.security_price (composite PK <code>(security_id, price_date)</code>); security 0..1—N app.company <em>per tenant</em> (partial unique) — many tenants may register the same security (the deliberate cross-tenant sharing point).</li><li>shareholder_record 1—N record_joint_holder (unique <code>(record_id, position)</code>), 1—N record_activity, 1—N audit.record_change.</li><li>Geography: country 1—N state 1—N district 1—N postal_index rows; cleansed record columns FK to each level independently (a record may have a country but no resolvable state).</li><li>No many-to-many relationships exist in this domain yet. A future <code>investor_master</code> (identity resolution across companies — the business goal behind "Unique Code … to find duplicates") would introduce one: investor N—M record via a match table. Deliberately <strong>not</strong> built now: with PAN/DOB/Aadhaar 0% populated there is no reliable match key, and guessing identities in the schema would corrupt the grain (§Q).</li><li>One-to-one: the cleansed address block stays <strong>on</strong> the record rather than in a 1:1 table — it is read on every search hit, and a join would buy nothing but latency.</li></ul>
+<h3 id="c-2-erd">C.2 ERD</h3>
+<figure class="diagram"><div class="diagram-scroll"><pre class="mermaid">erDiagram
+    TENANT ||--o{ APP_USER : "has"
+    TENANT ||--o{ COMPANY : "registers"
+    TENANT ||--o{ IMPORT_BATCH : "uploads"
+    TENANT ||--o{ SHAREHOLDER_RECORD : "owns"
+    SECURITY ||--o{ SECURITY_PRICE : "weekly close"
+    SECURITY ||--o{ COMPANY : "listed as (per tenant)"
+    COMPANY ||--o{ IMPORT_BATCH : "receives"
+    COMPANY ||--o{ SHAREHOLDER_RECORD : "register of"
+    IMPORT_BATCH ||--o{ SHAREHOLDER_RECORD : "loaded"
+    IMPORT_BATCH ||--o{ STG_RECORD_RAW : "lands"
+    SHAREHOLDER_RECORD ||--o{ RECORD_JOINT_HOLDER : "0..n"
+    SHAREHOLDER_RECORD ||--o{ RECORD_ACTIVITY : "timeline"
+    SHAREHOLDER_RECORD ||--o{ RECORD_CHANGE : "field diffs"
+    RECORD_STATUS ||--o{ SHAREHOLDER_RECORD : "workflow state"
+    INVESTMENT_TYPE ||--o{ SHAREHOLDER_RECORD : "category"
+    COUNTRY ||--o{ STATE : ""
+    STATE ||--o{ DISTRICT : ""
+    COUNTRY ||--o{ POSTAL_INDEX : "pincode directory"
+    STATE ||--o{ SHAREHOLDER_RECORD : "cleansed geo"
+
+    SHAREHOLDER_RECORD {
+        uuid id PK
+        uuid tenant_id "RLS + composite FKs"
+        uuid company_id FK
+        uuid import_batch_id FK
+        text folio_number "UQ per (tenant, company)"
+        text dp_account_number
+        text first_name "NOT NULL"
+        text full_name "GENERATED"
+        text cleaned_full_name "system-filled"
+        text address_raw "immutable"
+        text cleaned_pincode
+        smallint dividend_count
+        int dividend_shares "basis of market value"
+        int shareholder_shares
+        text shares_type "iepf / non_iepf / suspense"
+        date proposed_iepf_transfer_date
+        text status_code FK
+        int total_share_count "GENERATED"
+        tsvector search_tsv "GENERATED"
+        timestamptz deleted_at "soft delete"
+        int row_version "optimistic lock"
+    }
+    SECURITY_PRICE {
+        bigint security_id PK
+        date price_date PK
+        numeric close_price
+    }</pre></div><figcaption>Entity relationships. Market value is intentionally absent from every table &mdash; it is derived from the weekly price history.</figcaption></figure>
+<p><em>(Market value intentionally absent from every table: it lives in <code>app.v_record_valuation</code> = shares × latest <code>SECURITY_PRICE</code>.)</em></p>
+<h3 id="c-3-key-strategy">C.3 Key strategy</h3>
+<p>Surrogate keys everywhere a row is referenced across the system: <code>uuid</code> (via <code>gen_random_uuid()</code>) for tenant-owned business entities — safe to expose in URLs/APIs, mergeable across environments, no sequence contention across tenants; <code>bigint identity</code> for high-volume append-only children (<code>record_activity</code>, <code>record_joint_holder</code>, audit) where compactness matters and IDs are internal; <code>smallint/bigint identity</code> for reference rows. Natural keys are retained as <strong>unique constraints</strong>, never as PKs: <code>(tenant_id, company_id, upper(folio_number))</code>, <code>(tenant_id, short_code)</code>, <code>(country_id, name)</code>, <code>(security_id, price_date)</code>, ISIN. Composite <code>(tenant_id, id)</code> unique constraints exist solely as targets for tenant-safe composite FKs (§E.3).</p>
+</section>
+<section id="sec-d" class="sec"><header class="sec-head"><span class="sec-letter">D</span><h2>Table-by-Table Design</h2></header>
+<p>Notation: <strong>Key</strong> — PK / FK / UQ (unique) / cUQ (composite/partial unique). Audit columns (§F) are shown once per table but not re-explained. All <code>app.*</code> tables: RLS forced, policy <code>tenant_id = app.current_tenant_id()</code>.</p>
+<h3 id="d-1-app-tenant-client-organizations">D.1 <code>app.tenant</code> — client organizations</h3>
+<p>The isolation root. <code>settings jsonb</code> holds tenant-specific configuration (feature flags, formatting preferences) — a justified jsonb use: schemaless by nature, never filtered on relationally.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>uuid</td><td>NN</td><td>PK</td><td>gen_random_uuid()</td><td>Tenant surrogate id</td><td>PK</td></tr><tr><td>name</td><td>text</td><td>NN</td><td></td><td></td><td>Legal/display name</td><td>—</td></tr><tr><td>slug</td><td>text</td><td>NN</td><td>UQ</td><td></td><td>URL-safe identifier, CHECK format</td><td>UQ</td></tr><tr><td>status</td><td>text</td><td>NN</td><td></td><td>'active'</td><td>CHECK: active/suspended/offboarding/deleted</td><td>—</td></tr><tr><td>settings</td><td>jsonb</td><td>NN</td><td></td><td>'{}'</td><td>Tenant configuration</td><td>—</td></tr><tr><td>created_at / updated_at</td><td>timestamptz</td><td>NN</td><td></td><td>now()</td><td></td><td>—</td></tr></tbody></table></div>
+<h3 id="d-2-app-app-user-identities-per-tenant">D.2 <code>app.app_user</code> — identities per tenant</h3>
+<p>Referenced by every <code>*_by</code> column. <code>user_type='service'</code> rows are the per-tenant system accounts that own automated writes (imports, price-driven refreshes, geo enrichment) — so audit columns never need to be NULL for "the system did it".</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>uuid</td><td>NN</td><td>PK</td><td>gen_random_uuid()</td><td></td><td>PK</td></tr><tr><td>tenant_id</td><td>uuid</td><td>NN</td><td>FK→tenant</td><td></td><td></td><td>in UQ</td></tr><tr><td>email</td><td>text</td><td>NN</td><td>cUQ</td><td></td><td>CHECK email format; unique per tenant, case-insensitive</td><td>uq (tenant_id, lower(email))</td></tr><tr><td>display_name</td><td>text</td><td>NN</td><td></td><td></td><td></td><td>—</td></tr><tr><td>user_type</td><td>text</td><td>NN</td><td></td><td>'human'</td><td>CHECK: human/service</td><td>—</td></tr><tr><td>is_active</td><td>boolean</td><td>NN</td><td></td><td>true</td><td></td><td>—</td></tr><tr><td>created_at / updated_at</td><td>timestamptz</td><td>NN</td><td></td><td>now()</td><td></td><td>—</td></tr></tbody></table></div>
+<h3 id="d-3-reference-security-and-reference-security-price-shared-market-data">D.3 <code>reference.security</code> and <code>reference.security_price</code> — shared market data</h3>
+<p>The one deliberately shared dataset: prices are public facts fetched once (Saturday-night job) for all tenants. Append-only history — a valuation shown in March is explainable in June.</p>
+<p><code>reference.security</code></p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>bigint identity</td><td>NN</td><td>PK</td><td></td><td></td><td>PK</td></tr><tr><td>legal_name</td><td>text</td><td>NN</td><td></td><td></td><td>Canonical listed name</td><td>—</td></tr><tr><td>isin</td><td>char(12)</td><td>Y</td><td>UQ</td><td></td><td>CHECK ISIN format</td><td>UQ</td></tr><tr><td>nse_symbol / bse_code</td><td>text</td><td>Y</td><td></td><td></td><td>Exchange identifiers for the price feed</td><td>—</td></tr><tr><td>is_active</td><td>boolean</td><td>NN</td><td></td><td>true</td><td></td><td>—</td></tr></tbody></table></div>
+<p><code>reference.security_price</code></p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>security_id</td><td>bigint</td><td>NN</td><td>PK, FK→security</td><td></td><td></td><td>PK(1)</td></tr><tr><td>price_date</td><td>date</td><td>NN</td><td>PK</td><td></td><td>Pricing date (weekly)</td><td>PK(2)</td></tr><tr><td>close_price</td><td>numeric(12,2)</td><td>NN</td><td></td><td></td><td>CHECK &gt; 0. <code>numeric</code>, never float — money</td><td>—</td></tr><tr><td>source</td><td>text</td><td>NN</td><td></td><td>'NSE'</td><td>CHECK: NSE/BSE/MANUAL</td><td>—</td></tr></tbody></table></div>
+<p><code>reference.latest_security_price</code> (view): <code>DISTINCT ON (security_id) … ORDER BY price_date DESC</code> — index-backed by the PK.</p>
+<h3 id="d-4-app-company-a-tenant-s-company-registration">D.4 <code>app.company</code> — a tenant's company registration</h3>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>uuid</td><td>NN</td><td>PK</td><td>gen_random_uuid()</td><td></td><td>PK</td></tr><tr><td>tenant_id</td><td>uuid</td><td>NN</td><td>FK→tenant; UQ(tenant_id,id)</td><td></td><td>Composite-FK target</td><td>UQ</td></tr><tr><td>security_id</td><td>bigint</td><td>Y</td><td>FK→reference.security</td><td></td><td>NULL until mapped; market value needs it</td><td>cUQ (tenant_id, security_id) partial</td></tr><tr><td>display_name</td><td>text</td><td>NN</td><td>cUQ</td><td></td><td>Tenant's label ("BPCL Ltd")</td><td>uq (tenant_id, display_name)</td></tr><tr><td>short_code</td><td>text</td><td>NN</td><td>cUQ</td><td></td><td>Prefix for legacy record codes, CHECK <code>^[A-Z0-9]{2,6}$</code></td><td>uq (tenant_id, short_code)</td></tr><tr><td>is_active</td><td>boolean</td><td>NN</td><td></td><td>true</td><td></td><td>—</td></tr><tr><td>audit set</td><td></td><td></td><td></td><td></td><td>created/updated _at/_by, row_version</td><td>—</td></tr></tbody></table></div>
+<h3 id="d-5-app-import-batch-one-uploaded-file">D.5 <code>app.import_batch</code> — one uploaded file</h3>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>uuid</td><td>NN</td><td>PK</td><td>gen_random_uuid()</td><td></td><td>PK</td></tr><tr><td>tenant_id</td><td>uuid</td><td>NN</td><td>FK; UQ(tenant_id,id)</td><td></td><td></td><td>UQ</td></tr><tr><td>company_id</td><td>uuid</td><td>NN</td><td>cFK→company(tenant_id,id)</td><td></td><td>Tenant-safe composite FK</td><td>ix (tenant_id, company_id)</td></tr><tr><td>source_file_name</td><td>text</td><td>NN</td><td></td><td></td><td></td><td>—</td></tr><tr><td>source_file_sha256</td><td>text</td><td>Y</td><td>cUQ</td><td></td><td><strong>Idempotent imports</strong>: same file → conflict, not duplicates</td><td>uq partial</td></tr><tr><td>prepared_on</td><td>date</td><td>NN</td><td></td><td></td><td>Excel "Date of Preparation"</td><td>—</td></tr><tr><td>dividend_year_from / _to</td><td>smallint</td><td>Y</td><td></td><td></td><td>Parsed dividend window ("Div 2018 to 2024"); CHECK from ≤ to</td><td>—</td></tr><tr><td>analysis_remarks</td><td>text</td><td>Y</td><td></td><td></td><td>Excel "Remarks (From BI)"</td><td>—</td></tr><tr><td>status</td><td>text</td><td>NN</td><td></td><td>'received'</td><td>CHECK: received/validating/loaded/failed/archived</td><td>—</td></tr><tr><td>total_rows / loaded_rows / rejected_rows</td><td>integer</td><td>Y</td><td></td><td></td><td>Reconciliation counters</td><td>—</td></tr><tr><td>audit set</td><td></td><td></td><td></td><td></td><td>created/updated _at/_by, row_version</td><td>—</td></tr></tbody></table></div>
+<h3 id="d-6-app-shareholder-record-the-core-table">D.6 <code>app.shareholder_record</code> — THE core table</h3>
+<p>One row per unclaimed holding per company. Raw register fields are immutable evidence; <code>cleaned_*</code> fields are system-enriched; generated columns handle every verified derivation.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>uuid</td><td>NN</td><td>PK</td><td>gen_random_uuid()</td><td>The "system generated code" of the template</td><td>PK</td></tr><tr><td>tenant_id</td><td>uuid</td><td>NN</td><td>FK→tenant; UQ(tenant_id,id)</td><td></td><td>RLS + composite-FK anchor</td><td>in all composites</td></tr><tr><td>company_id</td><td>uuid</td><td>NN</td><td>cFK→company(tenant_id,id)</td><td></td><td>Cannot point at another tenant's company</td><td>leading in uq folio</td></tr><tr><td>import_batch_id</td><td>uuid</td><td>Y</td><td>cFK→import_batch(tenant_id,id)</td><td></td><td>Lineage</td><td>ix (tenant_id, import_batch_id)</td></tr><tr><td>record_code</td><td>text</td><td>Y</td><td>cUQ</td><td></td><td>Legacy "Unique Code", minted at import</td><td>uq (tenant_id, record_code) partial</td></tr><tr><td>folio_number</td><td>text</td><td>Y</td><td>cUQ</td><td></td><td></td><td><strong>uq (tenant_id, company_id, upper(folio_number)) WHERE folio IS NOT NULL AND deleted_at IS NULL</strong></td></tr><tr><td>dp_account_number</td><td>text</td><td>Y</td><td>cUQ</td><td></td><td>Demat account</td><td>same pattern</td></tr><tr><td>folio_or_demat</td><td>text</td><td>—</td><td></td><td>GENERATED</td><td>COALESCE(folio, dp) — Excel col Y</td><td>—</td></tr><tr><td>investment_type_id</td><td>smallint</td><td>NN</td><td>FK→reference.investment_type</td><td></td><td>MCA category</td><td>— (12-row lookup)</td></tr><tr><td>first_name</td><td>text</td><td>NN</td><td></td><td></td><td>CHECK non-blank ("no data accepted if blank")</td><td>—</td></tr><tr><td>middle_name / last_name</td><td>text</td><td>Y</td><td></td><td></td><td></td><td>—</td></tr><tr><td>full_name</td><td>text</td><td>—</td><td></td><td>GENERATED</td><td>TRIM/squash concat — verified 100% derivable</td><td>trgm via COALESCE expr</td></tr><tr><td>father_husband_ first/middle/last _name</td><td>text</td><td>Y</td><td></td><td></td><td></td><td>—</td></tr><tr><td>father_husband_full_name</td><td>text</td><td>—</td><td></td><td>GENERATED (NULLIF → real NULLs)</td><td>Fixes the 1,624 empty-string rows</td><td>in tsvector</td></tr><tr><td>cleaned_full_name</td><td>text</td><td>Y</td><td></td><td></td><td>System PROPER(TRIM()) + corrections</td><td>trgm + sort expr</td></tr><tr><td>cleaned_father_husband_name</td><td>text</td><td>Y</td><td></td><td></td><td></td><td>—</td></tr><tr><td>date_of_birth</td><td>date</td><td>Y</td><td></td><td></td><td>CHECK ≥ 1875-01-01. PII</td><td>—</td></tr><tr><td>pan</td><td>text</td><td>Y</td><td></td><td></td><td>CHECK <code>^[A-Z]{5}[0-9]{4}[A-Z]$</code>. PII</td><td>— (see §Q: index only if lookup-by-PAN becomes a feature)</td></tr><tr><td>aadhaar_last4</td><td>text</td><td>Y</td><td></td><td></td><td>CHECK 4 digits. Display/matching only</td><td>—</td></tr><tr><td>aadhaar_encrypted</td><td>bytea</td><td>Y</td><td></td><td></td><td>App-layer encrypted; never clear text</td><td>—</td></tr><tr><td>nominee_name</td><td>text</td><td>Y</td><td></td><td></td><td>PII</td><td>—</td></tr><tr><td>address_raw / country_raw / state_raw / district_raw / pincode_raw</td><td>text</td><td>Y</td><td></td><td></td><td>Verbatim source — immutable evidence</td><td>— (never indexed)</td></tr><tr><td>cleaned_address</td><td>text</td><td>Y</td><td></td><td></td><td>System-normalized</td><td>trgm via COALESCE expr</td></tr><tr><td>locality</td><td>text</td><td>Y</td><td></td><td></td><td>Auto-filled from pincode directory</td><td>—</td></tr><tr><td>cleaned_pincode</td><td>text</td><td>Y</td><td></td><td></td><td><code>text</code> (leading zeros, foreign codes); CHECK format</td><td>ix (tenant_id, cleaned_pincode) partial</td></tr><tr><td>country_id / state_id / district_id</td><td>smallint/smallint/integer</td><td>Y</td><td>FK→reference geo</td><td></td><td>Enriched, validated geography</td><td>ix (tenant_id, state_id) partial</td></tr><tr><td>geo_enriched_at</td><td>timestamptz</td><td>Y</td><td></td><td></td><td>Excel "Date of cleaning" (geo pass)</td><td>—</td></tr><tr><td>dividend_count</td><td>smallint</td><td>NN</td><td></td><td></td><td>CHECK 0–200</td><td>—</td></tr><tr><td>dividend_shares</td><td>integer</td><td>NN</td><td></td><td></td><td>CHECK ≥ 0. Market-value basis (verified)</td><td>—</td></tr><tr><td>shareholder_shares</td><td>integer</td><td>NN</td><td></td><td></td><td>CHECK ≥ 0</td><td>—</td></tr><tr><td>shares_type</td><td>text</td><td>NN</td><td></td><td></td><td>CHECK: iepf/non_iepf/suspense</td><td>in composite w/ status if needed</td></tr><tr><td>proposed_iepf_transfer_date</td><td>date</td><td>Y</td><td></td><td></td><td>Deadline-driven outreach filter</td><td>ix (tenant_id, date) partial</td></tr><tr><td>under_litigation</td><td>boolean</td><td>Y</td><td></td><td></td><td>NULL = not assessed</td><td>—</td></tr><tr><td>from_unpaid_suspense</td><td>boolean</td><td>Y</td><td></td><td></td><td>NULL = not assessed</td><td>—</td></tr><tr><td>source_remarks</td><td>text</td><td>Y</td><td></td><td></td><td>Row-level remarks from source</td><td>—</td></tr><tr><td>status_code</td><td>text</td><td>NN</td><td>FK→reference.record_status</td><td>'NOT_STARTED'</td><td>Workflow state</td><td>ix (tenant_id, company_id, status_code); ix (tenant_id, status_code)</td></tr><tr><td>status_changed_at / status_changed_by</td><td>timestamptz / uuid</td><td>Y</td><td>FK→app_user</td><td></td><td>Last transition (history in record_activity)</td><td>—</td></tr><tr><td>iepf_share_count / non_iepf_share_count / suspense_share_count</td><td>integer</td><td>Y</td><td></td><td></td><td>User-verified breakdown; CHECK ≥ 0; NULL until verified</td><td>—</td></tr><tr><td>total_share_count</td><td>integer</td><td>—</td><td></td><td>GENERATED sum</td><td>NULL until all three present (null-propagating on purpose)</td><td>—</td></tr><tr><td>search_tsv</td><td>tsvector</td><td>—</td><td></td><td>GENERATED</td><td>names + father + address + identifiers</td><td>GIN</td></tr><tr><td>created_at/by, updated_at/by, deleted_at/by</td><td>audit set</td><td></td><td>FK→app_user</td><td></td><td>Soft delete pair CHECK</td><td>partial indexes exclude deleted</td></tr><tr><td>row_version</td><td>integer</td><td>NN</td><td></td><td>1</td><td>Optimistic locking (trigger-bumped)</td><td>—</td></tr></tbody></table></div>
+<h3 id="d-7-app-record-joint-holder">D.7 <code>app.record_joint_holder</code></h3>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>bigint identity</td><td>NN</td><td>PK</td><td></td><td></td><td>PK</td></tr><tr><td>tenant_id</td><td>uuid</td><td>NN</td><td></td><td></td><td>RLS</td><td>—</td></tr><tr><td>record_id</td><td>uuid</td><td>NN</td><td>cFK→record(tenant_id,id) ON DELETE CASCADE</td><td></td><td></td><td>in UQ</td></tr><tr><td>holder_position</td><td>smallint</td><td>NN</td><td>cUQ</td><td></td><td>CHECK 1–10; UQ (record_id, position)</td><td>UQ</td></tr><tr><td>full_name</td><td>text</td><td>NN</td><td></td><td></td><td>CHECK non-blank</td><td>—</td></tr><tr><td>created_at / created_by</td><td></td><td></td><td></td><td></td><td></td><td>—</td></tr></tbody></table></div>
+<h3 id="d-8-app-record-activity-append-only-operational-timeline">D.8 <code>app.record_activity</code> — append-only operational timeline</h3>
+<p>UPDATE/DELETE revoked from all application roles. <code>details jsonb</code> carries per-type payload (e.g. <code>{"old_status": "...", "new_status": "..."}</code>) — justified jsonb: heterogeneous by activity type, never filtered relationally.</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>PostgreSQL Type</th><th>Null</th><th>Key</th><th>Default</th><th>Description</th><th>Index</th></tr></thead><tbody><tr><td>id</td><td>bigint identity</td><td>NN</td><td>PK</td><td></td><td></td><td>PK</td></tr><tr><td>tenant_id</td><td>uuid</td><td>NN</td><td></td><td></td><td>RLS</td><td>in ix</td></tr><tr><td>record_id</td><td>uuid</td><td>NN</td><td>cFK ON DELETE CASCADE</td><td></td><td></td><td>ix (record_id, occurred_at DESC)</td></tr><tr><td>activity_type</td><td>text</td><td>NN</td><td></td><td></td><td>CHECK: call/data_cleaning/validation/status_change/note</td><td>ix (tenant_id, type, occurred_at DESC)</td></tr><tr><td>occurred_at</td><td>timestamptz</td><td>NN</td><td></td><td>now()</td><td>Excel "Date of Calling" et al.</td><td>in ixs</td></tr><tr><td>remarks</td><td>text</td><td>Y</td><td></td><td></td><td>Cleaning/validation/call remarks</td><td>—</td></tr><tr><td>details</td><td>jsonb</td><td>Y</td><td></td><td></td><td>Type-specific payload</td><td>—</td></tr><tr><td>performed_by</td><td>uuid</td><td>Y</td><td>FK→app_user</td><td></td><td></td><td>—</td></tr></tbody></table></div>
+<h3 id="d-9-reference-geo-lookups-staging-audit">D.9 <code>reference</code> geo + lookups, <code>staging</code>, <code>audit</code></h3>
+<ul><li><code>reference.country</code> (id, iso2 UQ, name UQ) · <code>reference.state</code> (id, country_id FK, name; UQ(country_id, name)) · <code>reference.district</code> (id, state_id FK, name; UQ(state_id,name)) · <code>reference.postal_index</code> (country_id, pincode, locality, state_id, district_id; UQ(country_id, pincode, COALESCE(locality,'')); ix(pincode)) — loaded from government lists per the template requirement; drives auto-fill.</li><li><code>reference.investment_type</code> (id, code UQ, label UQ) — seeded with the observed value + standard MCA/IEPF categories.</li><li><code>reference.record_status</code> (code PK, label UQ, sort_order, is_terminal) — the "Status of Shares" dropdown + <code>NOT_STARTED</code> <span class="chip chip-asm">assumption</span>; <code>is_terminal=true</code> on CLAIMED supports the "all further columns blank once claimed" rule at the application layer.</li><li><code>staging.shareholder_record_raw</code> — every template column as <code>text</code>, plus <code>import_batch_id</code>, <code>source_row_number</code> (UQ per batch), <code>is_valid</code>, <code>validation_errors jsonb</code>, <code>target_record_id</code>, <code>loaded_at</code>. Nothing constrained beyond identity — its job is to accept dirty data.</li><li><code>audit.record_change</code> (id, tenant_id, table_name, record_pk, operation U/D, changed_at, changed_by, changed_columns text[], old_values jsonb, new_values jsonb) — trigger-fed diff log; ix (record_pk, changed_at DESC), ix (tenant_id, changed_at DESC). <code>text[]</code> here is a justified array: a list of column names, never joined against.</li></ul>
+<h3 id="d-10-read-model-views">D.10 Read-model views</h3>
+<ul><li><code>app.v_record_valuation</code> (<strong>security_invoker</strong>): record → company → latest price; emits <code>market_value</code> (= dividend_shares × price, the formula the sample actually follows) and <code>updated_market_value</code> (= COALESCE(total_share_count, shareholder_shares) × price).</li><li><code>app.v_record_current</code> (<strong>security_invoker</strong>): the API read shape — display name/address (cleaned-else-raw), derived <code>address_available</code>, joint-holder count, last-call timestamp, valuation columns, status label.</li><li><code>analytics.v_company_portfolio</code>, <code>analytics.v_geo_distribution</code>: tenant-filtering windows over the MVs (§H).</li></ul>
+</section>
+<section id="sec-e" class="sec"><header class="sec-head"><span class="sec-letter">E</span><h2>Tenant Architecture</h2></header>
+<h3 id="e-1-options-evaluated">E.1 Options evaluated</h3>
+<div class="table-wrap"><table><thead><tr><th>Model</th><th>Verdict</th><th>Reasoning</th></tr></thead><tbody><tr><td><strong>Shared database, shared schema + <code>tenant_id</code> + RLS</strong></td><td><strong>Recommended</strong></td><td>One migration path, one connection pool, one backup/monitoring surface; scales to thousands of tenants; PostgreSQL RLS makes isolation a database guarantee rather than an application habit; cross-tenant analytics for the operator stay possible under a controlled role.</td></tr><tr><td>Schema-per-tenant</td><td>Rejected</td><td>N× migration executions, catalog bloat at hundreds of schemas, connection-pool fragmentation, painful cross-tenant ops. Justified only when tenants demand bespoke schema variations — not the case here (one uniform template).</td></tr><tr><td>Database-per-tenant</td><td>Rejected (now)</td><td>Strongest isolation, but operationally heavy (per-DB backups/replicas/upgrades). Kept as the <strong>escape hatch for a regulated mega-tenant</strong>: because every table already carries <code>tenant_id</code>, extracting one tenant into a dedicated database is a filtered dump — the design keeps this door open.</td></tr><tr><td>Hybrid</td><td>Not yet</td><td>Becomes relevant in Phase 3 (§P): shared schema for the many, dedicated databases for the few giants.</td></tr></tbody></table></div>
+<h3 id="e-2-where-tenant-id-lives-and-where-it-must-not">E.2 Where <code>tenant_id</code> lives — and where it must not</h3>
+<ul><li><strong>Has <code>tenant_id</code> + RLS:</strong> every <code>app.*</code> table, <code>staging.shareholder_record_raw</code>, <code>audit.record_change</code>. Child tables (<code>record_joint_holder</code>, <code>record_activity</code>) carry it too — denormalized on purpose so RLS never depends on a join and their indexes can be tenant-prefixed.</li><li><strong>Must NOT have <code>tenant_id</code>:</strong> everything in <code>reference</code> (geo, securities, prices, vocabularies). Duplicating public reference data per tenant would multiply the price feed by the tenant count and create drift. This is the explicitly identified "not duplicated" boundary.</li></ul>
+<h3 id="e-3-isolation-that-cannot-be-bypassed-accidentally">E.3 Isolation that cannot be bypassed accidentally</h3>
+<p>Three independent layers, tested in the smoke run:</p>
+<ol><li><strong>Forced RLS</strong> on every tenant table (<code>FORCE ROW LEVEL SECURITY</code> — even the table owner is subject). Policy: <code>tenant_id = app.current_tenant_id()</code>, both <code>USING</code> and <code>WITH CHECK</code>. The context function returns NULL when unset → <strong>zero rows, fail closed</strong> (verified: no context ⇒ 0 visible; wrong tenant ⇒ 0 visible; cross-tenant INSERT ⇒ policy violation error).</li><li><strong>Tenant-aware composite foreign keys</strong>: <code>shareholder_record (tenant_id, company_id) → company (tenant_id, id)</code> and likewise for batch and record children. Even a bug running as a privileged role cannot attach a record to another tenant's company — the FK itself fails.</li><li><strong>Tenant-prefixed unique constraints and indexes</strong>: uniqueness is always scoped <code>(tenant_id, …)</code> — one tenant's folio numbering can never collide with another's, and every hot index is tenant-leading so a tenant's working set is a contiguous index range.</li></ol>
+<p><strong>Context handling:</strong> the application sets <code>SELECT set_config('app.current_tenant', $1, true)</code> (transaction-scoped, third argument <code>true</code>) at the start of every transaction — never connection-scoped, because pooled connections are reused across tenants (PgBouncer transaction mode). The user context (<code>app.current_user_id</code>) rides the same mechanism for audit attribution.</p>
+<p><strong>Cross-tenant operations:</strong> platform support/ops use <code>platform_admin</code> (<code>BYPASSRLS</code>), a break-glass role with audited access, never the application role. Cross-tenant aggregate reporting for the operator runs on the replica under that role.</p>
+<p><strong>Tenant lifecycle:</strong> offboarding = <code>tenant.status='offboarding'</code> (application blocks logins) → export → hard purge by <code>tenant_id</code> in child-first FK order (activity/joint holders cascade from records), then reference data is untouched. Because every table carries <code>tenant_id</code>, purge and export are single-predicate operations. <strong>Tenant-specific configuration</strong> lives in <code>tenant.settings jsonb</code>; per-tenant vocabulary extensions, if ever needed, would be a <code>tenant_id</code>-scoped overlay table — not edits to <code>reference</code>.</p>
+<p><strong>Large-tenant scalability:</strong> tenant-leading indexes mean a huge tenant degrades itself before it degrades neighbors for index-driven access; Phase 2/3 adds partitioning by <code>hash(tenant_id)</code> or extraction of the giant to its own database (§J, §P).</p>
+</section>
+<section id="sec-f" class="sec"><header class="sec-head"><span class="sec-letter">F</span><h2>Audit Strategy</h2></header>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Where</th><th>Why / where not</th></tr></thead><tbody><tr><td><code>created_at</code>/<code>created_by</code>, <code>updated_at</code>/<code>updated_by</code></td><td><code>company</code>, <code>import_batch</code>, <code>shareholder_record</code> (+ created-only on append-only children)</td><td>Mutable business tables. Not on <code>reference.*</code> rows loaded by pipelines (curated data, changes ship as migrations) beyond <code>created_at</code>, and not <code>updated_*</code> on append-only tables — they are never updated.</td></tr><tr><td><code>deleted_at</code>/<code>deleted_by</code></td><td><code>shareholder_record</code> only</td><td>The only entity users "remove" but the business must retain (evidence, reconciliation, restore). Pair-consistency CHECK <code>(deleted_at IS NULL) = (deleted_by IS NULL)</code>. Companies/batches deactivate (<code>is_active</code>, <code>status='archived'</code>), they don't delete. No <code>is_deleted</code> boolean — <code>deleted_at IS NULL</code> is one predicate, and a second flag can only disagree with it.</td></tr><tr><td><code>row_version</code></td><td>The three mutable tables</td><td>Optimistic locking: <code>UPDATE … WHERE id=$1 AND row_version=$2</code>; trigger bumps it. Concurrent edit → 0 rows → 409 to the client.</td></tr><tr><td>Timestamps</td><td><strong>Database-generated</strong> (<code>DEFAULT now()</code>, trigger for <code>updated_at</code>)</td><td>One clock; app servers drift.</td></tr><tr><td><code>*_by</code> identity</td><td><strong>Application-supplied</strong> <code>uuid → app.app_user(id)</code></td><td>The DB knows the pooled service login, not the human. FK to <code>app_user</code>; automated writes use the per-tenant <code>user_type='service'</code> account — never NULL "because the system did it".</td></tr><tr><td>Immutable records</td><td><code>record_activity</code>, <code>audit.record_change</code>, <code>staging</code> rows, <code>security_price</code>, raw <code>*_raw</code> columns</td><td>Enforced by revoked UPDATE/DELETE grants, not conventions.</td></tr><tr><td>History</td><td><code>audit.record_change</code> — field-level diff (changed columns, old/new jsonb) on UPDATE/DELETE of the core entity, via trigger; INSERTs are <em>not</em> logged (creation is fully described by the row + its batch). <code>record_activity</code> holds the <em>business</em> timeline (calls, cleansing, validation, status changes) — deliberately separate from the <em>technical</em> diff log: users read one, auditors read the other.</td><td></td></tr></tbody></table></div>
+<p>Trigger cost: one extra row write per core-entity update — acceptable at this workload (updates are human-driven: status changes, cleansing passes). Bulk system updates (e.g. re-enrichment) can temporarily <code>ALTER TABLE … DISABLE TRIGGER tg_shareholder_record_audit</code> inside a maintenance window with a batch-level audit entry instead — documented, not default.</p>
+<p>Temporal/event sourcing: <strong>not introduced.</strong> Requirements need "who changed what when" (diff log) and "what happened operationally" (activity log) — full bitemporal tables or event sourcing would add heavy complexity with no consumer. Effective-dating exists only where the domain has it naturally: the price history.</p>
+</section>
+<section id="sec-g" class="sec"><header class="sec-head"><span class="sec-letter">G</span><h2>Search Architecture</h2></header>
+<h3 id="g-1-what-gets-searched-inferred-from-data-template">G.1 What gets searched (inferred from data + template)</h3>
+<div class="table-wrap"><table><thead><tr><th>Access pattern</th><th>Mechanism</th><th>Index</th></tr></thead><tbody><tr><td>Fuzzy / partial name ("desai", "INDUMATI DES", misspellings)</td><td><code>pg_trgm</code> similarity / ILIKE '%…%'</td><td>GIN trgm on <code>COALESCE(cleaned_full_name, full_name)</code> (partial: live rows)</td></tr><tr><td>Multi-token search across name + father + address + folio ("DESAI BOMBAY")</td><td>FTS</td><td>GIN on generated <code>search_tsv</code> (<code>simple</code> config — proper nouns; no stemming language fits Indian names)</td></tr><tr><td>Address contains</td><td>trgm</td><td>GIN trgm on <code>COALESCE(cleaned_address, address_raw)</code></td></tr><tr><td>Exact folio / demat / record code</td><td>case-insensitive unique lookup</td><td>the <code>upper()</code> unique indexes double as lookup indexes</td></tr><tr><td>Facet: company + status (the workflow queue)</td><td>B-tree</td><td><code>(tenant_id, company_id, status_code)</code> partial</td></tr><tr><td>Facet: status across companies</td><td>B-tree</td><td><code>(tenant_id, status_code)</code> partial</td></tr><tr><td>Geography: state, pincode</td><td>B-tree</td><td><code>(tenant_id, state_id)</code>, <code>(tenant_id, cleaned_pincode)</code> partial</td></tr><tr><td>IEPF deadline windows</td><td>B-tree range</td><td><code>(tenant_id, proposed_iepf_transfer_date)</code> partial</td></tr><tr><td>Value-sorted lists ("largest recoveries first")</td><td>precomputed</td><td>analytics MV (value = shares × weekly price; changes once a week — no point computing per query)</td></tr><tr><td>Default browse + keyset pagination</td><td>B-tree</td><td><code>(tenant_id, COALESCE(cleaned_full_name, full_name), id)</code> partial</td></tr></tbody></table></div>
+<p>Every index above is justified by a named query, tenant-leading (equality on <code>tenant_id</code> makes composite order optimal: equality columns first, then selective filter/sort columns), and partial on <code>deleted_at IS NULL</code> where applicable so deleted rows cost nothing. Selectivity notes: <code>status_code</code> is low-cardinality but <em>skewed</em> (queues query the small active statuses — partial index still pays); trgm GIN indexes are the expensive ones (~30–50% of column size, slower writes) and are confined to the two text columns users actually search. Verified in plans: trgm similarity → Bitmap Index Scan on the GIN; tsquery → Bitmap Index Scan on <code>search_tsv</code>.</p>
+<p><strong>Case-insensitivity</strong> is handled by expression indexes (<code>upper(folio_number)</code>) and trgm (inherently case-insensitive via ILIKE/similarity) — no <code>citext</code> dependency.</p>
+<h3 id="g-2-when-postgresql-stops-being-enough">G.2 When PostgreSQL stops being enough</h3>
+<p>PostgreSQL <strong>is sufficient</strong> for this workload now and for a long time: single-tenant working sets in the millions, search = name/identifier/facet lookup, no relevance-ranking product requirements. Move name/address search (only) to OpenSearch/Elasticsearch when any of these hold: (a) &gt; ~50–100M live records with heavy concurrent fuzzy search causing GIN maintenance pain (index bloat on churn, slow REINDEX windows); (b) product needs relevance tuning, synonyms, phonetic matching (Indian-name transliteration variants: "Shah/Sha", "Chaudhuri/Choudhary") beyond trgm's edit-distance-ish behavior; (c) search QPS grows independent of transactional load and deserves its own scaling axis. Sync via logical replication/CDC into the engine; PostgreSQL remains the source of truth.</p>
+</section>
+<section id="sec-h" class="sec"><header class="sec-head"><span class="sec-letter">H</span><h2>Analytics Architecture</h2></header>
+<p>The workloads are dashboard-shaped: portfolio value per company, status funnels, geographic distribution, deadline pipelines, batch reconciliation — aggregations over at most tens of millions of rows, refreshed at most weekly (valuations change Saturday night) or per import.</p>
+<p><strong>Recommendation: stay on the OLTP cluster, isolate by object and by replica — no warehouse yet.</strong></p>
+<ol><li><strong>Materialized views</strong> (<code>analytics.company_portfolio_mv</code>, <code>analytics.geo_distribution_mv</code>) precompute the expensive joins (records × latest price). Refreshed <code>CONCURRENTLY</code> (unique indexes present) by the Saturday price job and after batch loads — analytics reads never scan the hot table at request time. MVs do not honor RLS, so raw MVs carry <strong>no grants</strong>; tenants reach them only through <code>analytics.v_*</code> views that filter on <code>app.current_tenant_id()</code> (verified: other tenant sees 0 rows).</li><li><strong>Read replica (Phase 2)</strong>: point reporting/exports and the operator's cross-tenant analysis at a hot-standby. Zero schema work — the design needs nothing changed.</li><li><strong>Warehouse (Phase 3)</strong>: when history depth (monthly valuation snapshots × years), cross-source joins, or scan volumes outgrow the replica — CDC (logical replication / Debezium) into a columnar store (BigQuery/Snowflake/ClickHouse). The dimensional model is already latent in this schema: fact = shareholder_record (+ a valuation snapshot fact keyed by price_date), dimensions = company/security, status, geography, investment type, date, tenant. Star-schema conversion is mechanical because the OLTP model normalized those dimensions from day one.</li><li><strong>Valuation time series</strong>: if "portfolio value over time" becomes a product feature, add an incremental weekly snapshot table (<code>analytics.portfolio_valuation_weekly</code>, appended by the price job) rather than recomputing history — noted as the first analytics evolution, not built now.</li></ol>
+<p>OLTP↔OLAP separation summary: same schema, separate objects (MVs), separate refresh windows, then separate hardware (replica), then separate engine (warehouse) — each step justified by measured pain, never speculative.</p>
+</section>
+<section id="sec-i" class="sec"><header class="sec-head"><span class="sec-letter">I</span><h2>Index Strategy (consolidated)</h2></header>
+<p><strong><code>app.shareholder_record</code></strong> — the only table where indexing is a real budget (write cost: each secondary index adds ~1 write amplification per insert/update of indexed columns; GIN worst).</p>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Index</th><th>Type</th><th>Supports</th><th>Cost note</th></tr></thead><tbody><tr><td>1</td><td>PK (id)</td><td>B-tree</td><td>Point lookup, FKs from children</td><td>—</td></tr><tr><td>2</td><td>UQ (tenant_id, id)</td><td>B-tree</td><td>Composite-FK target</td><td>Cheap, uuid pair</td></tr><tr><td>3</td><td>uq (tenant_id, company_id, upper(folio_number)) partial</td><td>B-tree</td><td>Natural-key integrity + exact folio search + FK-side join to company</td><td>Dual-purpose: constraint <em>and</em> the company-scoped browse index</td></tr><tr><td>4</td><td>uq (tenant_id, company_id, upper(dp_account_number)) partial</td><td>B-tree</td><td>Demat lookups</td><td>Tiny while column sparse (partial)</td></tr><tr><td>5</td><td>uq (tenant_id, record_code) partial</td><td>B-tree</td><td>Legacy-code reconciliation</td><td>—</td></tr><tr><td>6</td><td>GIN trgm COALESCE(cleaned_full_name, full_name) partial</td><td>GIN</td><td>Fuzzy/substring name search</td><td>Largest index; the core product feature — worth it</td></tr><tr><td>7</td><td>GIN trgm COALESCE(cleaned_address, address_raw) partial</td><td>GIN</td><td>Address contains</td><td>Drop if address search proves rare (measure <code>pg_stat_user_indexes.idx_scan</code>)</td></tr><tr><td>8</td><td>GIN search_tsv partial</td><td>GIN</td><td>Multi-token search</td><td>Generated column keeps it maintenance-free</td></tr><tr><td>9</td><td>(tenant_id, company_id, status_code) partial</td><td>B-tree</td><td>The workflow queue (most frequent screen)</td><td>High scan:write value</td></tr><tr><td>10</td><td>(tenant_id, status_code) partial</td><td>B-tree</td><td>Cross-company funnels</td><td>—</td></tr><tr><td>11</td><td>(tenant_id, cleaned_pincode) partial (NOT NULL)</td><td>B-tree</td><td>Geo drill-down</td><td>—</td></tr><tr><td>12</td><td>(tenant_id, state_id) partial (NOT NULL)</td><td>B-tree</td><td>Geo facet</td><td>—</td></tr><tr><td>13</td><td>(tenant_id, proposed_iepf_transfer_date) partial</td><td>B-tree</td><td>Deadline ranges</td><td>—</td></tr><tr><td>14</td><td>(tenant_id, import_batch_id)</td><td>B-tree</td><td>Batch drill-down, FK maintenance</td><td>—</td></tr><tr><td>15</td><td>(tenant_id, COALESCE(cleaned_full_name, full_name), id) partial</td><td>B-tree</td><td>Default sort + keyset pagination</td><td>Column order is the sort order; <code>id</code> = tie-breaker</td></tr></tbody></table></div>
+<p>Other tables: PKs; <code>record_activity</code> (record_id, occurred_at DESC) + (tenant_id, activity_type, occurred_at DESC); <code>record_joint_holder</code> UQ(record_id, position); <code>import_batch</code> file-hash UQ + (tenant_id, company_id); audit (record_pk, changed_at DESC) + (tenant_id, changed_at DESC); reference PK/UQ + <code>postal_index(pincode)</code>; MV unique indexes for concurrent refresh.</p>
+<p><strong>Deliberately NOT indexed:</strong> raw <code>*_raw</code> columns (never queried, only displayed), <code>middle_name</code>/<code>last_name</code> separately (searched via full-name indexes), booleans and other standalone low-cardinality flags (<code>shares_type</code>, <code>under_litigation</code> — planner would ignore them; they piggyback as residual filters), <code>pan</code> (0% populated; add a partial unique-per-tenant index <strong>only</strong> when PAN capture becomes real — flagged in §Q), <code>dividend_shares</code>/<code>shareholder_shares</code> (range queries on shares are rare; value sorting goes through the MV), <code>remarks</code> (free text, not a search target), <code>created_at</code> (no query needs it yet). INCLUDE/covering columns were considered and skipped: the hot queries already end in index-satisfiable predicates and the table read is one heap fetch per hit; covering indexes would grow write cost for marginal gain at this row width.</p>
+<p>Trade-off summary: 15 indexes on the core table is a considered budget for a <strong>read-dominated</strong> workload (imports are batched; user edits are low-QPS). Watch <code>pg_stat_user_indexes</code> quarterly and drop what doesn't scan; GIN indexes get <code>fastupdate</code> defaults and a periodic <code>REINDEX CONCURRENTLY</code> during maintenance if bloat appears.</p>
+</section>
+<section id="sec-j" class="sec"><header class="sec-head"><span class="sec-letter">J</span><h2>Partitioning Strategy</h2></header>
+<p><strong>Not partitioned at launch — concretely justified:</strong> the sample is 5K rows; even 9 companies × 100K records × 50 tenants ≈ 45M rows is comfortable for a well-indexed single table on modest hardware. Partitioning today would buy nothing and cost: every unique constraint must include the partition key (breaking the clean <code>(tenant_id, company_id, folio)</code> uniqueness unless the key is tenant-based), more planner work, more operational surface.</p>
+<p><strong>Introduce when</strong> (whichever comes first):</p>
+<ul><li><code>shareholder_record</code> exceeds ~100–200M rows or ~200–300 GB, and vacuum/index maintenance windows start to hurt; <strong>or</strong></li><li>one tenant dwarfs the rest (&gt; ~30% of rows) and needs independent maintenance/archival; <strong>or</strong></li><li>audit/activity tables outgrow the main table (they grow monotonically) — these partition <strong>first</strong> and most safely.</li></ul>
+<p><strong>How:</strong></p>
+<ul><li><code>app.shareholder_record</code> → <strong>HASH (tenant_id), 16–32 partitions.</strong> All uniques already lead with <code>tenant_id</code>, so constraints survive partitioning unchanged; every query is tenant-scoped, so partition pruning is total. (LIST-by-tenant is the variant if a few mega-tenants deserve dedicated partitions — the hybrid model.)</li><li><code>audit.record_change</code>, <code>app.record_activity</code> → <strong>RANGE (changed_at/occurred_at), monthly</strong> — enables retention by <code>DROP PARTITION</code> instead of DELETE+vacuum.</li><li><code>reference.security_price</code> → none foreseeable (52 rows/security/year).</li><li>Archival before partitioning: terminal (<code>CLAIMED</code>) records older than the retention window can move to an archive table by batch job — cheaper than partitioning and may defer it for years.</li></ul>
+</section>
+<section id="sec-k" class="sec"><header class="sec-head"><span class="sec-letter">K</span><h2>Security</h2></header>
+<h3 id="k-1-roles-least-privilege">K.1 Roles (least privilege)</h3>
+<div class="table-wrap"><table><thead><tr><th>Role</th><th>Grants</th><th>Purpose</th></tr></thead><tbody><tr><td><code>app_rw</code> (NOLOGIN group)</td><td>SELECT/INSERT/UPDATE on <code>app.*</code> (<strong>no DELETE</strong> — soft delete only; hard DELETE only on <code>record_joint_holder</code> corrections), INSERT-only on audit, read on reference, read on analytics tenant views</td><td>The API service</td></tr><tr><td><code>app_ro</code></td><td>SELECT on app + reference + analytics views</td><td>Reporting, exports, BI tools</td></tr><tr><td><code>svc_import</code></td><td>staging RW + app INSERT/UPDATE + reference read</td><td>ETL pipeline</td></tr><tr><td><code>svc_price_loader</code></td><td>INSERT/UPDATE on <code>reference.security(_price)</code> only</td><td>The Saturday-night job — can touch nothing else</td></tr><tr><td><code>platform_admin</code></td><td><code>BYPASSRLS</code>, break-glass</td><td>Cross-tenant support; access audited; never used by application code</td></tr><tr><td>migration role (schema owner)</td><td>DDL</td><td>CI/CD migrations only; RLS is FORCED so even the owner can't read tenant data casually</td></tr></tbody></table></div>
+<p>Login roles are thin members of these groups (<code>CREATE ROLE api_service LOGIN IN ROLE app_rw</code>). RLS policies + context handling: §E.3 (transaction-scoped <code>set_config</code>, fail-closed NULL behavior — all verified). Example policy (as deployed):</p>
+<div class="codeblock" data-cid="c1"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">5 lines</span><button class="code-copy" type="button" data-target="c1">Copy</button></div><div class="code-scroll"><pre id="c1"><code>CREATE POLICY p_tenant_isolation ON app.shareholder_record
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+ALTER TABLE app.shareholder_record ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.shareholder_record FORCE ROW LEVEL SECURITY;</code></pre></div></div>
+<h3 id="k-2-sensitive-data-classification-with-reasoning">K.2 Sensitive data classification (with reasoning)</h3>
+<div class="table-wrap"><table><thead><tr><th>Field(s)</th><th>Classification</th><th>Reasoning &amp; treatment</th></tr></thead><tbody><tr><td>Aadhaar</td><td><strong>Highest</strong> — regulated (Aadhaar Act 2016 restricts storage/display)</td><td>Never stored in clear: <code>aadhaar_encrypted bytea</code> (application-layer AEAD, key in KMS, never in DB) + <code>aadhaar_last4</code> for display/matching. Decryption confined to a dedicated service path, logged.</td></tr><tr><td>PAN</td><td>High — financial identifier (also an SPDI category under Indian IT Rules)</td><td>Format CHECK; masked in UI (<code>ABCDE****F</code>); column excluded from <code>app_ro</code> exports by policy; consider <code>pgcrypto</code>/app encryption if compliance review requires.</td></tr><tr><td>DOB</td><td>High (identity theft vector; DPDP Act personal data)</td><td>Sanity CHECK only; mask to year in list views.</td></tr><tr><td>Name, father/husband name, address, pincode, nominee, joint holders</td><td>PII (DPDP Act) — the product's working material</td><td>Access via authenticated tenant context only; full audit of changes; encrypted at rest (storage-level) and in transit; retention policy per tenant contract.</td></tr><tr><td>Folio/DP account</td><td>Sensitive business/financial account identifiers</td><td>Uniqueness + audit; not secret within the tenant.</td></tr><tr><td>Market values, share counts</td><td>Confidential business information (tenant's pipeline value)</td><td>Tenant isolation is the control.</td></tr><tr><td>Phone numbers</td><td>Not yet modeled but implied by "Date of Calling"</td><td>When added: same PII tier as address; put on a contact table, masked in logs.</td></tr></tbody></table></div>
+<p>Retention: raw staging rows and source files ≤ N months after successful reconciliation (configurable); audit log retained ≥ statutory period; tenant deletion purges all PII (§E.3). Backups inherit encryption; test restores quarterly.</p>
+</section>
+<section id="sec-l" class="sec"><header class="sec-head"><span class="sec-letter">L</span><h2>Data Quality — issues found and their handling</h2></header>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Issue (all <span class="chip chip-obs">observed</span> in the 5,000 rows)</th><th>Handling in target design</th></tr></thead><tbody><tr><td>1</td><td>Empty-string vs NULL inconsistency (1,624 father-name empty strings)</td><td>Staging cleanse <code>NULLIF(btrim(x),'')</code>; generated columns emit NULL; CHECKs forbid blank-but-not-null in mandatory names</td></tr><tr><td>2</td><td>Whitespace: 4,785/5,000 addresses with lead/trail spaces; template headers too</td><td><code>btrim</code> + whitespace-squash on load; generated columns normalize</td></tr><tr><td>3</td><td>O-vs-0 corruption: 94 addresses with "4OOO56"-style pincodes</td><td>Cleansing rule: in digit-context tokens map O→0; flagged into <code>validation_errors</code> for review, never silently on the raw column</td></tr><tr><td>4</td><td>Sentinel values: pincode <code>999999</code> on all 49 non-India rows</td><td>Sentinels → NULL at staging; CHECK format on cleaned pincode</td></tr><tr><td>5</td><td>Pincode typed as number</td><td><code>text</code> in schema (leading zeros, foreign formats)</td></tr><tr><td>6</td><td>Company-name inconsistency ("BPCL Ltd" vs legal names; "Ltd"/"Limited")</td><td>Names become FK to <code>app.company</code>; canonical name on <code>reference.security</code>; import maps by alias, unmatched names are rejected rows, not new companies</td></tr><tr><td>7</td><td>ALL-CAPS register text</td><td>Preserved raw; <code>cleaned_*</code> = PROPER-cased, system-filled (the template's own <code>Updated *</code> design)</td></tr><tr><td>8</td><td>Duplicate investors across companies: 56 identical (name+address) pairs, 189 repeated names</td><td>Legitimate at this grain (one row per company-folio). Cross-company identity resolution = future <code>investor_master</code> feature; <strong>not</strong> guessed in the schema</td></tr><tr><td>9</td><td>Spec-vs-data contradiction: Market Value derives from <em>dividend</em> shares in 100% of rows, spec says <em>shareholder</em> shares (47 rows would differ)</td><td>Value not stored; view exposes both bases; open question for the business (§Q)</td></tr><tr><td>10</td><td>Repeated file-level values (prep date, BI remarks on every row)</td><td>Normalized to <code>import_batch</code></td></tr><tr><td>11</td><td>District 0%, DP account 0%, PAN/DOB/Aadhaar/nominee/joint holders 0%</td><td>Nullable; enrichment fills district from pincode directory; template's "compulsory" matrix enforced at staging validation, not by NOT NULL on sparsely-populated optional columns</td></tr><tr><td>12</td><td><code>Address Available</code> constant "Yes" (useless as stored data)</td><td>Derived in view</td></tr><tr><td>13</td><td>Embedded structure in address (city, pincode inside the blob)</td><td>Kept as blob + enrichment extracts nothing destructively; cleaned geo lives in dedicated columns</td></tr><tr><td>14</td><td>Controlled vocabularies arriving as free text (shares type, statuses, investment type)</td><td>Lookup tables/CHECKs; staging maps labels → codes, unmapped → rejected row with error</td></tr><tr><td>15</td><td>Potential PII in free-text remarks</td><td>Policy + masking in exports; remarks excluded from search index (deliberately not in <code>search_tsv</code>… names/addresses only)</td></tr></tbody></table></div>
+</section>
+<section id="sec-m" class="sec"><header class="sec-head"><span class="sec-letter">M</span><h2>PostgreSQL DDL</h2></header>
+<p>The complete DDL below is delivered as an executable file (<code>schema.sql</code>) and <strong>ran cleanly, top to bottom, on PostgreSQL 16.13</strong> (followed by a full load of the 5,000 sample rows and the RLS/search/audit test suite). Prerequisites are stated in the header; everything runs in one transaction.</p>
+<div class="codeblock is-tall" data-cid="c2"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">872 lines</span><button class="code-copy" type="button" data-target="c2">Copy</button></div><div class="code-scroll"><pre id="c2"><code>-- ============================================================================
+-- Unclaimed Investment / IEPF Recovery Platform — Module 1 (Shareholder Data)
+-- Enterprise PostgreSQL schema
+--
+-- Target: PostgreSQL 16+  (15 works; security_invoker views require &gt;= 15)
+-- Prerequisites:
+--   * Run as a superuser (or a role allowed to CREATE EXTENSION / CREATE ROLE)
+--   * Extensions: pg_trgm (fuzzy search), pgcrypto (gen_random_uuid on PG&lt;13,
+--     and field-level encryption helpers)
+--
+-- Conventions:
+--   * snake_case everywhere; singular table names
+--   * PK column: id | constraint names: pk_/fk_/uq_/ck_ prefixes
+--   * index names: ix_&lt;table&gt;__&lt;cols&gt;, unique: uq_&lt;table&gt;__&lt;cols&gt;
+--   * tenant-owned tables: tenant_id UUID NOT NULL + RLS (FORCED)
+--   * schemas: reference (shared), app (tenant OLTP), staging (imports),
+--     audit (change history), analytics (reporting objects)
+-- ============================================================================
+
+BEGIN;
+
+-- ----------------------------------------------------------------------------
+-- 0. Extensions, schemas, roles
+-- ----------------------------------------------------------------------------
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE SCHEMA IF NOT EXISTS reference;
+CREATE SCHEMA IF NOT EXISTS app;
+CREATE SCHEMA IF NOT EXISTS staging;
+CREATE SCHEMA IF NOT EXISTS audit;
+CREATE SCHEMA IF NOT EXISTS analytics;
+
+COMMENT ON SCHEMA reference IS 'Shared, tenant-agnostic reference data (geo, securities, lookups). Read-only for application roles.';
+COMMENT ON SCHEMA app       IS 'Tenant-owned OLTP data. Every table carries tenant_id and is protected by forced RLS.';
+COMMENT ON SCHEMA staging   IS 'Raw import landing zone (all-text). Data is validated/cleansed here before promotion to app.*';
+COMMENT ON SCHEMA audit     IS 'Append-only change history.';
+COMMENT ON SCHEMA analytics IS 'Materialized views and reporting objects. Accessed via tenant-filtering views only.';
+
+-- Roles (NOLOGIN group roles; actual login users are granted membership).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_rw') THEN
+    CREATE ROLE app_rw NOLOGIN;                      -- application read/write (RLS-bound)
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_ro') THEN
+    CREATE ROLE app_ro NOLOGIN;                      -- reporting / read-only (RLS-bound)
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'svc_price_loader') THEN
+    CREATE ROLE svc_price_loader NOLOGIN;            -- weekly NSE/BSE price sync job
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'svc_import') THEN
+    CREATE ROLE svc_import NOLOGIN;                  -- ETL / import pipeline
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'platform_admin') THEN
+    CREATE ROLE platform_admin NOLOGIN BYPASSRLS;    -- cross-tenant support/ops (break-glass)
+  END IF;
+END $$;
+
+-- ----------------------------------------------------------------------------
+-- 1. Session context helpers
+--    The application sets, per transaction (never per connection when pooled):
+--      SELECT set_config('app.current_tenant',  '&lt;tenant uuid&gt;', true);
+--      SELECT set_config('app.current_user_id', '&lt;user uuid&gt;',   true);
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION app.current_tenant_id() RETURNS uuid
+LANGUAGE sql STABLE PARALLEL SAFE
+AS $$ SELECT NULLIF(current_setting('app.current_tenant', true), '')::uuid $$;
+
+CREATE OR REPLACE FUNCTION app.current_user_id() RETURNS uuid
+LANGUAGE sql STABLE PARALLEL SAFE
+AS $$ SELECT NULLIF(current_setting('app.current_user_id', true), '')::uuid $$;
+
+COMMENT ON FUNCTION app.current_tenant_id() IS 'Tenant context for RLS. NULL (no context) matches no rows — fail closed.';
+
+-- Generic audit-column trigger: bumps updated_at / row_version on UPDATE.
+CREATE OR REPLACE FUNCTION app.tg_touch_row() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at  := now();
+  NEW.updated_by  := COALESCE(NEW.updated_by, app.current_user_id());
+  NEW.row_version := OLD.row_version + 1;
+  RETURN NEW;
+END $$;
+
+-- ----------------------------------------------------------------------------
+-- 2. reference schema — shared lookups (no tenant_id, no RLS)
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE reference.country (
+  id          smallint GENERATED ALWAYS AS IDENTITY,
+  iso2        char(2),
+  name        text NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_country PRIMARY KEY (id),
+  CONSTRAINT uq_country__name UNIQUE (name),
+  CONSTRAINT uq_country__iso2 UNIQUE (iso2),
+  CONSTRAINT ck_country__name_not_blank CHECK (btrim(name) &lt;&gt; '')
+);
+COMMENT ON TABLE reference.country IS 'Country master (source: ISO 3166). Cleansed geo columns FK here.';
+
+CREATE TABLE reference.state (
+  id          smallint GENERATED ALWAYS AS IDENTITY,
+  country_id  smallint NOT NULL,
+  name        text NOT NULL,
+  short_code  text,
+  CONSTRAINT pk_state PRIMARY KEY (id),
+  CONSTRAINT fk_state__country FOREIGN KEY (country_id) REFERENCES reference.country (id),
+  CONSTRAINT uq_state__country_name UNIQUE (country_id, name)
+);
+COMMENT ON TABLE reference.state IS 'State/province master, maintained from government lists (requirement: "updated by latest list as per govt data").';
+
+CREATE TABLE reference.district (
+  id        integer GENERATED ALWAYS AS IDENTITY,
+  state_id  smallint NOT NULL,
+  name      text NOT NULL,
+  CONSTRAINT pk_district PRIMARY KEY (id),
+  CONSTRAINT fk_district__state FOREIGN KEY (state_id) REFERENCES reference.state (id),
+  CONSTRAINT uq_district__state_name UNIQUE (state_id, name)
+);
+
+-- India Post directory: one row per (pincode, locality). Drives the
+-- requirement "blank state/district/locality automatically filled by system as per pincode".
+CREATE TABLE reference.postal_index (
+  id           integer GENERATED ALWAYS AS IDENTITY,
+  country_id   smallint NOT NULL,
+  pincode      text NOT NULL,
+  locality     text,
+  district_id  integer,
+  state_id     smallint,
+  CONSTRAINT pk_postal_index PRIMARY KEY (id),
+  CONSTRAINT fk_postal_index__country  FOREIGN KEY (country_id)  REFERENCES reference.country (id),
+  CONSTRAINT fk_postal_index__district FOREIGN KEY (district_id) REFERENCES reference.district (id),
+  CONSTRAINT fk_postal_index__state    FOREIGN KEY (state_id)    REFERENCES reference.state (id),
+  CONSTRAINT ck_postal_index__pincode_format CHECK (pincode ~ '^[0-9A-Za-z -]{3,10}$')
+);
+CREATE UNIQUE INDEX uq_postal_index__country_pin_locality
+  ON reference.postal_index (country_id, pincode, COALESCE(locality, ''));
+CREATE INDEX ix_postal_index__pincode ON reference.postal_index (pincode);
+
+-- Listed-security master (shared: prices are public facts, fetched once for all tenants).
+CREATE TABLE reference.security (
+  id           bigint GENERATED ALWAYS AS IDENTITY,
+  legal_name   text NOT NULL,
+  isin         char(12),
+  nse_symbol   text,
+  bse_code     text,
+  is_active    boolean NOT NULL DEFAULT true,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_security PRIMARY KEY (id),
+  CONSTRAINT uq_security__isin UNIQUE (isin),
+  CONSTRAINT ck_security__isin_format CHECK (isin IS NULL OR isin ~ '^[A-Z]{2}[A-Z0-9]{9}[0-9]$')
+);
+COMMENT ON TABLE reference.security IS 'Listed-company/security master (ISIN, exchange symbols). Weekly price sync keys off this table.';
+
+-- Price history: append-only time series, one row per security per pricing date.
+-- Populated by the scheduled job ("system will update the price every Saturday night").
+CREATE TABLE reference.security_price (
+  security_id  bigint NOT NULL,
+  price_date   date NOT NULL,
+  close_price  numeric(12,2) NOT NULL,
+  source       text NOT NULL DEFAULT 'NSE',
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_security_price PRIMARY KEY (security_id, price_date),
+  CONSTRAINT fk_security_price__security FOREIGN KEY (security_id) REFERENCES reference.security (id),
+  CONSTRAINT ck_security_price__positive CHECK (close_price &gt; 0),
+  CONSTRAINT ck_security_price__source CHECK (source IN ('NSE','BSE','MANUAL'))
+);
+COMMENT ON TABLE reference.security_price IS 'Weekly close-price history. Market value is ALWAYS derived from this table — never stored on records.';
+
+CREATE OR REPLACE VIEW reference.latest_security_price AS
+SELECT DISTINCT ON (security_id)
+       security_id, price_date, close_price, source
+FROM   reference.security_price
+ORDER  BY security_id, price_date DESC;
+COMMENT ON VIEW reference.latest_security_price IS 'Most recent price per security (index-backed DISTINCT ON over the PK).';
+
+-- Investment type (MCA/IEPF-2 controlled vocabulary — lookup table, not enum:
+-- the ministry adds categories over time and labels must be tenant-visible).
+CREATE TABLE reference.investment_type (
+  id     smallint GENERATED ALWAYS AS IDENTITY,
+  code   text NOT NULL,
+  label  text NOT NULL,
+  CONSTRAINT pk_investment_type PRIMARY KEY (id),
+  CONSTRAINT uq_investment_type__code UNIQUE (code),
+  CONSTRAINT uq_investment_type__label UNIQUE (label)
+);
+
+INSERT INTO reference.investment_type (code, label) VALUES
+  ('UNPAID_DIVIDEND',    'Amount for unclaimed and unpaid Dividend'),
+  ('MATURED_DEPOSIT',    'Amount for matured deposits'),
+  ('MATURED_DEBENTURE',  'Amount for matured debentures'),
+  ('APPLICATION_REFUND', 'Amount for application money due for refund'),
+  ('SHARES_TO_IEPF',     'Shares transferred to IEPF'),
+  ('INTEREST_ON_ABOVE',  'Interest accrued on the above'),
+  ('OTHER',              'Other unclaimed amounts');
+
+-- Record workflow status ("Status of Shares" dropdown).
+-- NOTE: 'NOT_STARTED' is an addition — the source dropdown has no initial state,
+-- but a NOT NULL workflow column needs one. Flagged as an assumption.
+CREATE TABLE reference.record_status (
+  code         text NOT NULL,
+  label        text NOT NULL,
+  sort_order   smallint NOT NULL,
+  is_terminal  boolean NOT NULL DEFAULT false,
+  CONSTRAINT pk_record_status PRIMARY KEY (code),
+  CONSTRAINT uq_record_status__label UNIQUE (label)
+);
+
+INSERT INTO reference.record_status (code, label, sort_order, is_terminal) VALUES
+  ('NOT_STARTED',        'Not Started',               0, false),
+  ('KYC_NOT_UPDATED',    'KYC Not Updated',          10, false),
+  ('UNDER_PROCESS',      'Under Process',            20, false),
+  ('PROCEDURE_ISSUED',   'Procedure Issued',         30, false),
+  ('ENTITLEMENT_ISSUED', 'Entitlement Letter Issued',40, false),
+  ('IEPF_FILED',         'IEPF Filed',               50, false),
+  ('CLAIMED',            'Claimed',                  60, true),
+  ('OTHERS',             'Others',                   90, false);
+
+-- ----------------------------------------------------------------------------
+-- 3. app schema — tenant-owned OLTP tables
+-- ----------------------------------------------------------------------------
+
+CREATE TABLE app.tenant (
+  id          uuid NOT NULL DEFAULT gen_random_uuid(),
+  name        text NOT NULL,
+  slug        text NOT NULL,
+  status      text NOT NULL DEFAULT 'active',
+  settings    jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_tenant PRIMARY KEY (id),
+  CONSTRAINT uq_tenant__slug UNIQUE (slug),
+  CONSTRAINT ck_tenant__slug_format CHECK (slug ~ '^[a-z0-9][a-z0-9-]{1,62}$'),
+  CONSTRAINT ck_tenant__status CHECK (status IN ('active','suspended','offboarding','deleted'))
+);
+COMMENT ON TABLE app.tenant IS 'One row per client organization. settings holds tenant-specific configuration (jsonb, schemaless by design).';
+
+CREATE TABLE app.app_user (
+  id            uuid NOT NULL DEFAULT gen_random_uuid(),
+  tenant_id     uuid NOT NULL,
+  email         text NOT NULL,
+  display_name  text NOT NULL,
+  user_type     text NOT NULL DEFAULT 'human',
+  is_active     boolean NOT NULL DEFAULT true,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_app_user PRIMARY KEY (id),
+  CONSTRAINT fk_app_user__tenant FOREIGN KEY (tenant_id) REFERENCES app.tenant (id),
+  CONSTRAINT ck_app_user__type CHECK (user_type IN ('human','service')),
+  CONSTRAINT ck_app_user__email CHECK (email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$')
+);
+CREATE UNIQUE INDEX uq_app_user__tenant_email ON app.app_user (tenant_id, lower(email));
+COMMENT ON TABLE app.app_user IS 'Application identities per tenant, including per-tenant service accounts (user_type = service) used by system jobs for created_by/updated_by.';
+
+-- A tenant''s registration of a company they work on. display_name is the
+-- tenant''s label (source data shows "BPCL Ltd" vs legal names); the canonical
+-- name lives on reference.security.
+CREATE TABLE app.company (
+  id           uuid NOT NULL DEFAULT gen_random_uuid(),
+  tenant_id    uuid NOT NULL,
+  security_id  bigint,
+  display_name text NOT NULL,
+  short_code   text NOT NULL,
+  is_active    boolean NOT NULL DEFAULT true,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  created_by   uuid,
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  updated_by   uuid,
+  row_version  integer NOT NULL DEFAULT 1,
+  CONSTRAINT pk_company PRIMARY KEY (id),
+  CONSTRAINT uq_company__tenant_id_id UNIQUE (tenant_id, id),          -- target for tenant-safe composite FKs
+  CONSTRAINT fk_company__tenant   FOREIGN KEY (tenant_id)   REFERENCES app.tenant (id),
+  CONSTRAINT fk_company__security FOREIGN KEY (security_id) REFERENCES reference.security (id),
+  CONSTRAINT fk_company__created_by FOREIGN KEY (created_by) REFERENCES app.app_user (id),
+  CONSTRAINT fk_company__updated_by FOREIGN KEY (updated_by) REFERENCES app.app_user (id),
+  CONSTRAINT uq_company__tenant_short_code UNIQUE (tenant_id, short_code),
+  CONSTRAINT uq_company__tenant_display_name UNIQUE (tenant_id, display_name),
+  CONSTRAINT ck_company__short_code CHECK (short_code ~ '^[A-Z0-9]{2,6}$')
+);
+CREATE UNIQUE INDEX uq_company__tenant_security ON app.company (tenant_id, security_id)
+  WHERE security_id IS NOT NULL;
+COMMENT ON COLUMN app.company.short_code IS 'Tenant-chosen prefix (TCL, REL, ...) used to mint legacy record codes. Unique per tenant.';
+
+-- One row per uploaded file ("Date of Preparation", "Remarks (From BI)" and the
+-- dividend window are file-level facts — repeated on all 5,000 sample rows,
+-- normalized out here).
+CREATE TABLE app.import_batch (
+  id                  uuid NOT NULL DEFAULT gen_random_uuid(),
+  tenant_id           uuid NOT NULL,
+  company_id          uuid NOT NULL,
+  source_file_name    text NOT NULL,
+  source_file_sha256  text,
+  prepared_on         date NOT NULL,
+  dividend_year_from  smallint,
+  dividend_year_to    smallint,
+  analysis_remarks    text,
+  status              text NOT NULL DEFAULT 'received',
+  total_rows          integer,
+  loaded_rows         integer,
+  rejected_rows       integer,
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  created_by          uuid,
+  updated_at          timestamptz NOT NULL DEFAULT now(),
+  updated_by          uuid,
+  row_version         integer NOT NULL DEFAULT 1,
+  CONSTRAINT pk_import_batch PRIMARY KEY (id),
+  CONSTRAINT uq_import_batch__tenant_id_id UNIQUE (tenant_id, id),
+  CONSTRAINT fk_import_batch__tenant  FOREIGN KEY (tenant_id) REFERENCES app.tenant (id),
+  CONSTRAINT fk_import_batch__company FOREIGN KEY (tenant_id, company_id)
+      REFERENCES app.company (tenant_id, id),
+  CONSTRAINT fk_import_batch__created_by FOREIGN KEY (created_by) REFERENCES app.app_user (id),
+  CONSTRAINT fk_import_batch__updated_by FOREIGN KEY (updated_by) REFERENCES app.app_user (id),
+  CONSTRAINT ck_import_batch__status CHECK (status IN ('received','validating','loaded','failed','archived')),
+  CONSTRAINT ck_import_batch__year_order CHECK (
+      dividend_year_from IS NULL OR dividend_year_to IS NULL
+      OR dividend_year_from &lt;= dividend_year_to)
+);
+CREATE UNIQUE INDEX uq_import_batch__tenant_file_hash
+  ON app.import_batch (tenant_id, source_file_sha256)
+  WHERE source_file_sha256 IS NOT NULL;
+CREATE INDEX ix_import_batch__tenant_company ON app.import_batch (tenant_id, company_id);
+COMMENT ON TABLE app.import_batch IS 'One row per imported file. The file-hash unique index makes re-imports idempotent.';
+
+-- ============================================================================
+-- CORE ENTITY: shareholder_record — one row per (company, folio/demat account)
+-- ============================================================================
+CREATE TABLE app.shareholder_record (
+  id                        uuid NOT NULL DEFAULT gen_random_uuid(),
+  tenant_id                 uuid NOT NULL,
+  company_id                uuid NOT NULL,
+  import_batch_id           uuid,
+
+  -- Identifiers
+  record_code               text,          -- legacy "Unique Code" (short_code || padding || folio), minted at import
+  folio_number              text,          -- physical-holding identifier, unique per company
+  dp_account_number         text,          -- demat: DP Id - Client Id - Account Number
+  folio_or_demat            text GENERATED ALWAYS AS (COALESCE(folio_number, dp_account_number)) STORED,
+  investment_type_id        smallint NOT NULL,
+
+  -- Investor identity (as printed in the company register — preserved verbatim)
+  first_name                text NOT NULL,
+  middle_name               text,
+  last_name                 text,
+  full_name                 text GENERATED ALWAYS AS (
+                              btrim(regexp_replace(
+                                COALESCE(first_name,'') || ' ' || COALESCE(middle_name,'') || ' ' || COALESCE(last_name,''),
+                                '\s+', ' ', 'g'))) STORED,
+  father_husband_first_name  text,
+  father_husband_middle_name text,
+  father_husband_last_name   text,
+  father_husband_full_name  text GENERATED ALWAYS AS (
+                              NULLIF(btrim(regexp_replace(
+                                COALESCE(father_husband_first_name,'') || ' ' || COALESCE(father_husband_middle_name,'') || ' ' || COALESCE(father_husband_last_name,''),
+                                '\s+', ' ', 'g')), '')) STORED,
+
+  -- Cleansed identity (system-filled: PROPER(TRIM(...)) + corrections)
+  cleaned_full_name         text,
+  cleaned_father_husband_name text,
+
+  -- KYC / PII (sensitive — see security notes; Aadhaar never stored in clear)
+  date_of_birth             date,
+  pan                       text,
+  aadhaar_last4             text,
+  aadhaar_encrypted         bytea,
+  nominee_name              text,
+
+  -- Address: raw as imported (immutable evidence) + cleansed/enriched
+  address_raw               text,
+  country_raw               text,
+  state_raw                 text,
+  district_raw              text,
+  pincode_raw               text,
+  cleaned_address           text,
+  locality                  text,
+  cleaned_pincode           text,
+  country_id                smallint,
+  state_id                  smallint,
+  district_id               integer,
+  geo_enriched_at           timestamptz,
+
+  -- Holding / dividend facts from file preparation
+  dividend_count            smallint NOT NULL,
+  dividend_shares           integer NOT NULL,   -- "Final No Shares (Dividend)" — basis for market value
+  shareholder_shares        integer NOT NULL,   -- "Final No of Shares (Shareholder)"
+  shares_type               text NOT NULL,      -- iepf | non_iepf | suspense (classification at prep time)
+  proposed_iepf_transfer_date date,
+  under_litigation          boolean,            -- NULL = not yet assessed
+  from_unpaid_suspense      boolean,            -- NULL = not yet assessed
+  source_remarks            text,
+
+  -- Workflow
+  status_code               text NOT NULL DEFAULT 'NOT_STARTED',
+  status_changed_at         timestamptz,
+  status_changed_by         uuid,
+
+  -- Validated share breakdown (user-verified during processing; NULL until verified)
+  iepf_share_count          integer,
+  non_iepf_share_count      integer,
+  suspense_share_count      integer,
+  total_share_count         integer GENERATED ALWAYS AS
+                              (iepf_share_count + non_iepf_share_count + suspense_share_count) STORED,
+
+  -- Full-text search document (names + father/husband + address + identifiers)
+  search_tsv                tsvector GENERATED ALWAYS AS (
+                              to_tsvector('simple',
+                                COALESCE(cleaned_full_name,'') || ' ' ||
+                                COALESCE(first_name,'')  || ' ' || COALESCE(middle_name,'') || ' ' || COALESCE(last_name,'') || ' ' ||
+                                COALESCE(father_husband_first_name,'') || ' ' || COALESCE(father_husband_last_name,'') || ' ' ||
+                                COALESCE(cleaned_address, address_raw, '') || ' ' ||
+                                COALESCE(folio_number,'') || ' ' || COALESCE(dp_account_number,''))) STORED,
+
+  -- Audit
+  created_at                timestamptz NOT NULL DEFAULT now(),
+  created_by                uuid,
+  updated_at                timestamptz NOT NULL DEFAULT now(),
+  updated_by                uuid,
+  deleted_at                timestamptz,
+  deleted_by                uuid,
+  row_version               integer NOT NULL DEFAULT 1,
+
+  CONSTRAINT pk_shareholder_record PRIMARY KEY (id),
+  CONSTRAINT uq_shareholder_record__tenant_id_id UNIQUE (tenant_id, id),
+  CONSTRAINT fk_shareholder_record__tenant  FOREIGN KEY (tenant_id) REFERENCES app.tenant (id),
+  CONSTRAINT fk_shareholder_record__company FOREIGN KEY (tenant_id, company_id)
+      REFERENCES app.company (tenant_id, id),
+  CONSTRAINT fk_shareholder_record__batch   FOREIGN KEY (tenant_id, import_batch_id)
+      REFERENCES app.import_batch (tenant_id, id),
+  CONSTRAINT fk_shareholder_record__investment_type FOREIGN KEY (investment_type_id)
+      REFERENCES reference.investment_type (id),
+  CONSTRAINT fk_shareholder_record__status FOREIGN KEY (status_code)
+      REFERENCES reference.record_status (code),
+  CONSTRAINT fk_shareholder_record__country  FOREIGN KEY (country_id)  REFERENCES reference.country (id),
+  CONSTRAINT fk_shareholder_record__state    FOREIGN KEY (state_id)    REFERENCES reference.state (id),
+  CONSTRAINT fk_shareholder_record__district FOREIGN KEY (district_id) REFERENCES reference.district (id),
+  CONSTRAINT fk_shareholder_record__created_by FOREIGN KEY (created_by) REFERENCES app.app_user (id),
+  CONSTRAINT fk_shareholder_record__updated_by FOREIGN KEY (updated_by) REFERENCES app.app_user (id),
+  CONSTRAINT fk_shareholder_record__deleted_by FOREIGN KEY (deleted_by) REFERENCES app.app_user (id),
+  CONSTRAINT fk_shareholder_record__status_changed_by FOREIGN KEY (status_changed_by) REFERENCES app.app_user (id),
+
+  CONSTRAINT ck_shareholder_record__identifier_present
+      CHECK (folio_number IS NOT NULL OR dp_account_number IS NOT NULL),
+  CONSTRAINT ck_shareholder_record__first_name_not_blank CHECK (btrim(first_name) &lt;&gt; ''),
+  CONSTRAINT ck_shareholder_record__shares_type CHECK (shares_type IN ('iepf','non_iepf','suspense')),
+  CONSTRAINT ck_shareholder_record__dividend_count CHECK (dividend_count BETWEEN 0 AND 200),
+  CONSTRAINT ck_shareholder_record__dividend_shares_nonneg CHECK (dividend_shares &gt;= 0),
+  CONSTRAINT ck_shareholder_record__shareholder_shares_nonneg CHECK (shareholder_shares &gt;= 0),
+  CONSTRAINT ck_shareholder_record__bucket_counts_nonneg CHECK (
+      COALESCE(iepf_share_count,0) &gt;= 0 AND COALESCE(non_iepf_share_count,0) &gt;= 0
+      AND COALESCE(suspense_share_count,0) &gt;= 0),
+  CONSTRAINT ck_shareholder_record__pan_format
+      CHECK (pan IS NULL OR pan ~ '^[A-Z]{5}[0-9]{4}[A-Z]$'),
+  CONSTRAINT ck_shareholder_record__aadhaar_last4
+      CHECK (aadhaar_last4 IS NULL OR aadhaar_last4 ~ '^[0-9]{4}$'),
+  CONSTRAINT ck_shareholder_record__dob_sane
+      CHECK (date_of_birth IS NULL OR date_of_birth &gt;= DATE '1875-01-01'),
+  CONSTRAINT ck_shareholder_record__cleaned_pincode_format
+      CHECK (cleaned_pincode IS NULL OR cleaned_pincode ~ '^[0-9A-Za-z -]{3,10}$'),
+  CONSTRAINT ck_shareholder_record__soft_delete_pair
+      CHECK ((deleted_at IS NULL) = (deleted_by IS NULL))
+);
+
+COMMENT ON TABLE  app.shareholder_record IS 'Core entity: one unclaimed-holding record per (company, folio/demat account). Raw register fields are immutable evidence; cleaned_* fields are system-enriched.';
+COMMENT ON COLUMN app.shareholder_record.record_code IS 'Legacy Excel "Unique Code". Kept for continuity/reconciliation; real uniqueness is (tenant, company, folio).';
+COMMENT ON COLUMN app.shareholder_record.dividend_shares IS 'Shares underlying the unclaimed dividends ("Final No Shares (Dividend)"). Sample data derives Market Value from THIS column x share price.';
+COMMENT ON COLUMN app.shareholder_record.aadhaar_encrypted IS 'Aadhaar number encrypted at application layer (never stored in clear — Aadhaar Act 2016). aadhaar_last4 kept for display/matching.';
+COMMENT ON COLUMN app.shareholder_record.search_tsv IS 'Generated full-text document. Market value is NOT stored: derive via reference.latest_security_price.';
+
+-- Natural-key uniqueness (case-insensitive, soft-delete aware)
+CREATE UNIQUE INDEX uq_shareholder_record__company_folio
+  ON app.shareholder_record (tenant_id, company_id, upper(folio_number))
+  WHERE folio_number IS NOT NULL AND deleted_at IS NULL;
+CREATE UNIQUE INDEX uq_shareholder_record__company_dp
+  ON app.shareholder_record (tenant_id, company_id, upper(dp_account_number))
+  WHERE dp_account_number IS NOT NULL AND deleted_at IS NULL;
+CREATE UNIQUE INDEX uq_shareholder_record__record_code
+  ON app.shareholder_record (tenant_id, record_code)
+  WHERE record_code IS NOT NULL AND deleted_at IS NULL;
+
+-- Search / filter indexes (all live-rows-only)
+CREATE INDEX ix_shareholder_record__name_trgm
+  ON app.shareholder_record
+  USING gin ((COALESCE(cleaned_full_name, full_name)) gin_trgm_ops)
+  WHERE deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__address_trgm
+  ON app.shareholder_record
+  USING gin ((COALESCE(cleaned_address, address_raw)) gin_trgm_ops)
+  WHERE deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__search_tsv
+  ON app.shareholder_record USING gin (search_tsv)
+  WHERE deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__tenant_company_status
+  ON app.shareholder_record (tenant_id, company_id, status_code)
+  WHERE deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__tenant_status
+  ON app.shareholder_record (tenant_id, status_code)
+  WHERE deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__tenant_pincode
+  ON app.shareholder_record (tenant_id, cleaned_pincode)
+  WHERE cleaned_pincode IS NOT NULL AND deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__tenant_state
+  ON app.shareholder_record (tenant_id, state_id)
+  WHERE state_id IS NOT NULL AND deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__tenant_iepf_date
+  ON app.shareholder_record (tenant_id, proposed_iepf_transfer_date)
+  WHERE deleted_at IS NULL;
+CREATE INDEX ix_shareholder_record__tenant_batch
+  ON app.shareholder_record (tenant_id, import_batch_id);
+-- Default list order + keyset pagination: name ASC, id as tie-breaker
+CREATE INDEX ix_shareholder_record__tenant_name_id
+  ON app.shareholder_record (tenant_id, (COALESCE(cleaned_full_name, full_name)), id)
+  WHERE deleted_at IS NULL;
+
+-- Joint holders: 0..n per record ("Joint Holder 1/2" + "Count of Joint Holder")
+CREATE TABLE app.record_joint_holder (
+  id               bigint GENERATED ALWAYS AS IDENTITY,
+  tenant_id        uuid NOT NULL,
+  record_id        uuid NOT NULL,
+  holder_position  smallint NOT NULL,
+  full_name        text NOT NULL,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  created_by       uuid,
+  CONSTRAINT pk_record_joint_holder PRIMARY KEY (id),
+  CONSTRAINT fk_record_joint_holder__record FOREIGN KEY (tenant_id, record_id)
+      REFERENCES app.shareholder_record (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT fk_record_joint_holder__created_by FOREIGN KEY (created_by) REFERENCES app.app_user (id),
+  CONSTRAINT uq_record_joint_holder__record_position UNIQUE (record_id, holder_position),
+  CONSTRAINT ck_record_joint_holder__position CHECK (holder_position BETWEEN 1 AND 10),
+  CONSTRAINT ck_record_joint_holder__name_not_blank CHECK (btrim(full_name) &lt;&gt; '')
+);
+COMMENT ON TABLE app.record_joint_holder IS 'Joint holders, one row per holder (replaces JH1/JH2 columns). "Count of Joint Holder" is derived: COUNT(*).';
+
+-- Operational timeline: calls, cleansing runs, validation notes, status changes.
+-- Append-only (UPDATE/DELETE revoked). Replaces the "Date of Calling",
+-- "Data Cleaning Remarks", "Data Validation Remarks" columns with full history.
+CREATE TABLE app.record_activity (
+  id             bigint GENERATED ALWAYS AS IDENTITY,
+  tenant_id      uuid NOT NULL,
+  record_id      uuid NOT NULL,
+  activity_type  text NOT NULL,
+  occurred_at    timestamptz NOT NULL DEFAULT now(),
+  remarks        text,
+  details        jsonb,
+  performed_by   uuid,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_record_activity PRIMARY KEY (id),
+  CONSTRAINT fk_record_activity__record FOREIGN KEY (tenant_id, record_id)
+      REFERENCES app.shareholder_record (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT fk_record_activity__performed_by FOREIGN KEY (performed_by) REFERENCES app.app_user (id),
+  CONSTRAINT ck_record_activity__type CHECK (
+      activity_type IN ('call','data_cleaning','validation','status_change','note'))
+);
+CREATE INDEX ix_record_activity__record_time
+  ON app.record_activity (record_id, occurred_at DESC);
+CREATE INDEX ix_record_activity__tenant_type_time
+  ON app.record_activity (tenant_id, activity_type, occurred_at DESC);
+
+-- ----------------------------------------------------------------------------
+-- 4. audit schema — field-level change history for the core entity
+-- ----------------------------------------------------------------------------
+CREATE TABLE audit.record_change (
+  id               bigint GENERATED ALWAYS AS IDENTITY,
+  tenant_id        uuid NOT NULL,
+  table_name       text NOT NULL,
+  record_pk        uuid NOT NULL,
+  operation        text NOT NULL,
+  changed_at       timestamptz NOT NULL DEFAULT now(),
+  changed_by       uuid,
+  changed_columns  text[],
+  old_values       jsonb,
+  new_values       jsonb,
+  CONSTRAINT pk_record_change PRIMARY KEY (id),
+  CONSTRAINT ck_record_change__operation CHECK (operation IN ('U','D'))
+);
+CREATE INDEX ix_record_change__record ON audit.record_change (record_pk, changed_at DESC);
+CREATE INDEX ix_record_change__tenant_time ON audit.record_change (tenant_id, changed_at DESC);
+COMMENT ON TABLE audit.record_change IS 'Append-only diff log (UPDATE/DELETE) for app.shareholder_record. INSERTs are not logged: creation is fully described by the row + import_batch.';
+
+CREATE OR REPLACE FUNCTION audit.tg_capture_record_change() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_old  jsonb;
+  v_new  jsonb;
+  v_cols text[];
+  k      text;
+BEGIN
+  v_old := to_jsonb(OLD) - 'search_tsv' - 'updated_at' - 'updated_by' - 'row_version';
+  IF TG_OP = 'UPDATE' THEN
+    v_new := to_jsonb(NEW) - 'search_tsv' - 'updated_at' - 'updated_by' - 'row_version';
+    SELECT array_agg(key) INTO v_cols
+    FROM (
+      SELECT key FROM jsonb_each(v_old) o(key, value)
+      WHERE v_new -&gt; key IS DISTINCT FROM value
+    ) diff;
+    IF v_cols IS NULL THEN
+      RETURN NEW;  -- no material change
+    END IF;
+    INSERT INTO audit.record_change
+      (tenant_id, table_name, record_pk, operation, changed_by, changed_columns, old_values, new_values)
+    SELECT OLD.tenant_id, TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME, OLD.id, 'U',
+           app.current_user_id(), v_cols,
+           (SELECT jsonb_object_agg(c, v_old -&gt; c) FROM unnest(v_cols) c),
+           (SELECT jsonb_object_agg(c, v_new -&gt; c) FROM unnest(v_cols) c);
+    RETURN NEW;
+  ELSE
+    INSERT INTO audit.record_change
+      (tenant_id, table_name, record_pk, operation, changed_by, old_values)
+    VALUES (OLD.tenant_id, TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME, OLD.id, 'D',
+            app.current_user_id(), v_old);
+    RETURN OLD;
+  END IF;
+END $$;
+
+CREATE TRIGGER tg_shareholder_record_touch
+  BEFORE UPDATE ON app.shareholder_record
+  FOR EACH ROW EXECUTE FUNCTION app.tg_touch_row();
+CREATE TRIGGER tg_company_touch
+  BEFORE UPDATE ON app.company
+  FOR EACH ROW EXECUTE FUNCTION app.tg_touch_row();
+CREATE TRIGGER tg_import_batch_touch
+  BEFORE UPDATE ON app.import_batch
+  FOR EACH ROW EXECUTE FUNCTION app.tg_touch_row();
+CREATE TRIGGER tg_shareholder_record_audit
+  AFTER UPDATE OR DELETE ON app.shareholder_record
+  FOR EACH ROW EXECUTE FUNCTION audit.tg_capture_record_change();
+
+-- ----------------------------------------------------------------------------
+-- 5. staging schema — raw landing zone (everything text; nothing constrained)
+-- ----------------------------------------------------------------------------
+CREATE TABLE staging.shareholder_record_raw (
+  id                       bigint GENERATED ALWAYS AS IDENTITY,
+  tenant_id                uuid NOT NULL,
+  import_batch_id          uuid NOT NULL,
+  source_row_number        integer NOT NULL,      -- Excel "Sr No" / physical row
+  company_name             text,
+  unique_code              text,
+  dividend_count           text,
+  dividend_shares          text,
+  shares_type              text,
+  address_available        text,
+  first_name               text,
+  middle_name              text,
+  last_name                text,
+  full_name                text,
+  father_first_name        text,
+  father_middle_name       text,
+  father_last_name         text,
+  father_full_name         text,
+  address                  text,
+  country                  text,
+  state                    text,
+  district                 text,
+  pincode                  text,
+  folio_number             text,
+  dp_account_number        text,
+  folio_or_demat           text,
+  investment_type          text,
+  shareholder_shares       text,
+  proposed_iepf_transfer_date text,
+  pan                      text,
+  date_of_birth            text,
+  aadhaar_number           text,
+  nominee_name             text,
+  joint_holder_name        text,
+  remarks                  text,
+  under_litigation         text,
+  from_unpaid_suspense     text,
+  share_price              text,
+  market_value             text,
+  preparation_date         text,
+  bi_remarks               text,
+  -- validation outcome
+  is_valid                 boolean,
+  validation_errors        jsonb,
+  target_record_id         uuid,
+  loaded_at                timestamptz,
+  created_at               timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT pk_shareholder_record_raw PRIMARY KEY (id),
+  CONSTRAINT uq_shareholder_record_raw__batch_row UNIQUE (import_batch_id, source_row_number)
+);
+CREATE INDEX ix_shareholder_record_raw__batch ON staging.shareholder_record_raw (import_batch_id) ;
+COMMENT ON TABLE staging.shareholder_record_raw IS 'All-text mirror of the upload template. Rows are validated/cleansed here; only valid rows are promoted to app.shareholder_record.';
+
+-- ----------------------------------------------------------------------------
+-- 6. Derived-value views (market value is computed, never stored)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW app.v_record_valuation
+WITH (security_invoker = true) AS
+SELECT r.id AS record_id,
+       r.tenant_id,
+       r.company_id,
+       lp.price_date,
+       lp.close_price                                    AS share_price,
+       (r.dividend_shares::numeric * lp.close_price)     AS market_value,          -- Excel "Market Value"
+       (COALESCE(r.total_share_count, r.shareholder_shares)::numeric
+          * lp.close_price)                              AS updated_market_value   -- Excel "Updated Market Value"
+FROM   app.shareholder_record r
+JOIN   app.company c ON c.id = r.company_id AND c.tenant_id = r.tenant_id
+LEFT   JOIN reference.latest_security_price lp ON lp.security_id = c.security_id
+WHERE  r.deleted_at IS NULL;
+COMMENT ON VIEW app.v_record_valuation IS 'Derived market values (shares x latest weekly price). security_invoker =&gt; caller RLS applies.';
+
+CREATE OR REPLACE VIEW app.v_record_current
+WITH (security_invoker = true) AS
+SELECT r.id, r.tenant_id, r.company_id, c.display_name AS company_name,
+       r.record_code, r.folio_number, r.dp_account_number, r.folio_or_demat,
+       COALESCE(r.cleaned_full_name, r.full_name)        AS display_name,
+       r.full_name, r.father_husband_full_name,
+       COALESCE(r.cleaned_address, r.address_raw)        AS display_address,
+       (COALESCE(r.cleaned_address, r.address_raw) IS NOT NULL) AS address_available,  -- derived, not stored
+       r.cleaned_pincode, r.state_id, r.country_id,
+       r.dividend_count, r.dividend_shares, r.shareholder_shares, r.shares_type,
+       r.proposed_iepf_transfer_date, r.status_code, rs.label AS status_label,
+       v.share_price, v.market_value, v.updated_market_value,
+       (SELECT count(*) FROM app.record_joint_holder j WHERE j.record_id = r.id) AS joint_holder_count,
+       (SELECT max(a.occurred_at) FROM app.record_activity a
+         WHERE a.record_id = r.id AND a.activity_type = 'call')                  AS last_called_at,
+       r.created_at, r.updated_at, r.row_version
+FROM   app.shareholder_record r
+JOIN   app.company c  ON c.id = r.company_id AND c.tenant_id = r.tenant_id
+JOIN   reference.record_status rs ON rs.code = r.status_code
+LEFT   JOIN app.v_record_valuation v ON v.record_id = r.id
+WHERE  r.deleted_at IS NULL;
+COMMENT ON VIEW app.v_record_current IS 'API read model: live records with derived fields (market value, address_available, joint-holder count, last call).';
+
+-- ----------------------------------------------------------------------------
+-- 7. analytics schema — materialized rollups (refreshed after the weekly
+--    price sync and after large imports). MVs ignore RLS, so they are exposed
+--    ONLY through tenant-filtering views.
+-- ----------------------------------------------------------------------------
+CREATE MATERIALIZED VIEW analytics.company_portfolio_mv AS
+SELECT r.tenant_id,
+       r.company_id,
+       c.display_name                                   AS company_name,
+       count(*)                                         AS record_count,
+       count(*) FILTER (WHERE r.status_code = 'CLAIMED')          AS claimed_count,
+       count(*) FILTER (WHERE r.status_code = 'NOT_STARTED')      AS not_started_count,
+       count(*) FILTER (WHERE r.shares_type = 'iepf')             AS iepf_record_count,
+       count(*) FILTER (WHERE r.shares_type = 'non_iepf')         AS non_iepf_record_count,
+       count(*) FILTER (WHERE r.shares_type = 'suspense')         AS suspense_record_count,
+       sum(r.dividend_shares)::bigint                   AS total_dividend_shares,
+       sum(r.shareholder_shares)::bigint                AS total_shareholder_shares,
+       max(lp.close_price)                              AS share_price,
+       max(lp.price_date)                               AS price_date,
+       sum(r.dividend_shares::numeric * lp.close_price) AS total_market_value
+FROM   app.shareholder_record r
+JOIN   app.company c ON c.id = r.company_id AND c.tenant_id = r.tenant_id
+LEFT   JOIN reference.latest_security_price lp ON lp.security_id = c.security_id
+WHERE  r.deleted_at IS NULL
+GROUP  BY r.tenant_id, r.company_id, c.display_name;
+CREATE UNIQUE INDEX uq_company_portfolio_mv__tenant_company
+  ON analytics.company_portfolio_mv (tenant_id, company_id);   -- enables REFRESH CONCURRENTLY
+
+CREATE MATERIALIZED VIEW analytics.geo_distribution_mv AS
+SELECT r.tenant_id,
+       r.country_id,
+       r.state_id,
+       count(*)                        AS record_count,
+       sum(r.dividend_shares)::bigint  AS total_dividend_shares
+FROM   app.shareholder_record r
+WHERE  r.deleted_at IS NULL
+GROUP  BY r.tenant_id, r.country_id, r.state_id;
+CREATE UNIQUE INDEX uq_geo_distribution_mv__keys
+  ON analytics.geo_distribution_mv (tenant_id, COALESCE(country_id,0), COALESCE(state_id,0));
+
+-- Tenant-safe accessors (plain views; the WHERE clause enforces tenancy because
+-- materialized views do not participate in RLS):
+CREATE OR REPLACE VIEW analytics.v_company_portfolio AS
+SELECT * FROM analytics.company_portfolio_mv
+WHERE  tenant_id = app.current_tenant_id();
+CREATE OR REPLACE VIEW analytics.v_geo_distribution AS
+SELECT * FROM analytics.geo_distribution_mv
+WHERE  tenant_id = app.current_tenant_id();
+
+-- ----------------------------------------------------------------------------
+-- 8. Row-Level Security — fail-closed tenant isolation
+-- ----------------------------------------------------------------------------
+ALTER TABLE app.tenant                    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.tenant                    FORCE  ROW LEVEL SECURITY;
+ALTER TABLE app.app_user                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.app_user                  FORCE  ROW LEVEL SECURITY;
+ALTER TABLE app.company                   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.company                   FORCE  ROW LEVEL SECURITY;
+ALTER TABLE app.import_batch              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.import_batch              FORCE  ROW LEVEL SECURITY;
+ALTER TABLE app.shareholder_record        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.shareholder_record        FORCE  ROW LEVEL SECURITY;
+ALTER TABLE app.record_joint_holder       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.record_joint_holder       FORCE  ROW LEVEL SECURITY;
+ALTER TABLE app.record_activity           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.record_activity           FORCE  ROW LEVEL SECURITY;
+ALTER TABLE staging.shareholder_record_raw ENABLE ROW LEVEL SECURITY;
+ALTER TABLE staging.shareholder_record_raw FORCE  ROW LEVEL SECURITY;
+ALTER TABLE audit.record_change           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit.record_change           FORCE  ROW LEVEL SECURITY;
+
+-- The tenant row itself: a session may see only its own tenant.
+CREATE POLICY p_tenant_self ON app.tenant
+  USING (id = app.current_tenant_id());
+
+CREATE POLICY p_tenant_isolation ON app.app_user
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON app.company
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON app.import_batch
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON app.shareholder_record
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON app.record_joint_holder
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON app.record_activity
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON staging.shareholder_record_raw
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+CREATE POLICY p_tenant_isolation ON audit.record_change
+  USING (tenant_id = app.current_tenant_id())
+  WITH CHECK (tenant_id = app.current_tenant_id());
+
+-- ----------------------------------------------------------------------------
+-- 9. Grants — least privilege
+-- ----------------------------------------------------------------------------
+GRANT USAGE ON SCHEMA reference, app, analytics TO app_rw, app_ro;
+GRANT USAGE ON SCHEMA staging, audit TO app_rw;
+GRANT USAGE ON SCHEMA reference, app, staging TO svc_import;
+GRANT USAGE ON SCHEMA reference TO svc_price_loader;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA reference TO app_rw, app_ro, svc_import;
+GRANT SELECT, INSERT, UPDATE ON reference.security, reference.security_price TO svc_price_loader;
+
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA app TO app_rw;   -- no DELETE: soft delete only
+GRANT SELECT ON ALL TABLES IN SCHEMA app TO app_ro;
+GRANT DELETE ON app.record_joint_holder TO app_rw;                    -- child rows are hard-deleted with corrections
+
+GRANT SELECT, INSERT ON audit.record_change TO app_rw;                -- append-only: no UPDATE/DELETE grant
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA app, audit TO app_rw;
+
+GRANT SELECT, INSERT, UPDATE ON staging.shareholder_record_raw TO svc_import, app_rw;
+GRANT SELECT, INSERT, UPDATE ON app.import_batch, app.shareholder_record,
+      app.record_joint_holder, app.record_activity, app.company TO svc_import;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA staging TO svc_import, app_rw;
+
+GRANT SELECT ON analytics.v_company_portfolio, analytics.v_geo_distribution TO app_rw, app_ro;
+-- Deliberately NO grant on the raw MVs: tenants reach them only via the views above.
+
+-- record_activity is append-only for everyone but the owner:
+REVOKE UPDATE, DELETE ON app.record_activity FROM app_rw, svc_import;
+
+COMMIT;
+
+-- ============================================================================
+-- Post-deployment notes (not part of the transaction):
+-- 1. Create login roles per service, e.g.:
+--      CREATE ROLE api_service LOGIN PASSWORD '...' IN ROLE app_rw;
+-- 2. The application MUST set tenant context per transaction:
+--      SELECT set_config('app.current_tenant',  :tenant_uuid, true);
+--      SELECT set_config('app.current_user_id', :user_uuid,   true);
+-- 3. Refresh analytics after the Saturday price sync and after bulk imports:
+--      REFRESH MATERIALIZED VIEW CONCURRENTLY analytics.company_portfolio_mv;
+--      REFRESH MATERIALIZED VIEW CONCURRENTLY analytics.geo_distribution_mv;
+-- 4. autovacuum: consider per-table tuning on app.shareholder_record once it
+--    exceeds ~10M rows (lower scale factors, higher cost limits).
+-- ============================================================================</code></pre></div><button class="code-expand" type="button">Show all 872 lines</button></div>
+</section>
+<section id="sec-n" class="sec"><header class="sec-head"><span class="sec-letter">N</span><h2>Example Queries</h2></header>
+<p>All queries assume the transaction context is set (RLS active):</p>
+<div class="codeblock" data-cid="c3"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">2 lines</span><button class="code-copy" type="button" data-target="c3">Copy</button></div><div class="code-scroll"><pre id="c3"><code>SELECT set_config('app.current_tenant',  :tenant_uuid, true);
+SELECT set_config('app.current_user_id', :user_uuid,  true);</code></pre></div></div>
+<p><strong>1. Common search — fuzzy name (GIN trgm, index #6):</strong></p>
+<div class="codeblock" data-cid="c4"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">7 lines</span><button class="code-copy" type="button" data-target="c4">Copy</button></div><div class="code-scroll"><pre id="c4"><code>SELECT id, display_name, company_name, folio_number, status_code
+FROM   app.v_record_current
+WHERE  display_name % :query                       -- display_name = COALESCE(cleaned, raw)
+ORDER  BY similarity(display_name, :query) DESC
+LIMIT  20;
+-- the planner inlines the view, so display_name resolves to the exact
+-- indexed expression; verified plan: Bitmap Index Scan on ix_shareholder_record__name_trgm</code></pre></div></div>
+<p><strong>2. Multi-token search (name + address + folio; GIN tsvector, index #8):</strong></p>
+<div class="codeblock" data-cid="c5"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">6 lines</span><button class="code-copy" type="button" data-target="c5">Copy</button></div><div class="code-scroll"><pre id="c5"><code>SELECT id, display_name, display_address
+FROM   app.v_record_current r
+WHERE  EXISTS (SELECT 1 FROM app.shareholder_record s
+               WHERE s.id = r.id
+                 AND s.search_tsv @@ plainto_tsquery('simple', 'desai bombay'))
+LIMIT  20;</code></pre></div></div>
+<p><strong>3. Multi-filter, tenant-scoped workflow queue (index #9):</strong></p>
+<div class="codeblock" data-cid="c6"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">9 lines</span><button class="code-copy" type="button" data-target="c6">Copy</button></div><div class="code-scroll"><pre id="c6"><code>SELECT id, display_name, folio_number, proposed_iepf_transfer_date, market_value
+FROM   app.v_record_current
+WHERE  company_id = :company_id
+  AND  status_code IN ('NOT_STARTED','KYC_NOT_UPDATED')
+  AND  shares_type = 'iepf'                       -- residual filter on the index hits
+ORDER  BY proposed_iepf_transfer_date NULLS LAST
+LIMIT  50;
+-- (tenant_id, company_id, status_code) partial index prunes to the queue;
+-- shares_type filters the survivors</code></pre></div></div>
+<p><strong>4. Keyset pagination, default name order (index #15) — the recommended pattern; OFFSET is O(skipped rows), keyset is O(page):</strong></p>
+<div class="codeblock" data-cid="c7"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">13 lines</span><button class="code-copy" type="button" data-target="c7">Copy</button></div><div class="code-scroll"><pre id="c7"><code>-- page 1
+SELECT COALESCE(cleaned_full_name, full_name) AS nm, id, folio_number
+FROM   app.shareholder_record
+WHERE  deleted_at IS NULL
+ORDER  BY COALESCE(cleaned_full_name, full_name), id
+LIMIT  50;
+-- page N+1: client sends back (last_nm, last_id) as the cursor
+SELECT COALESCE(cleaned_full_name, full_name) AS nm, id, folio_number
+FROM   app.shareholder_record
+WHERE  deleted_at IS NULL
+  AND  (COALESCE(cleaned_full_name, full_name), id) &gt; (:last_nm, :last_id)
+ORDER  BY COALESCE(cleaned_full_name, full_name), id
+LIMIT  50;   -- row-constructor comparison walks index #15; ties broken by id (stable)</code></pre></div></div>
+<p><strong>5. Detail retrieval (PK + children):</strong></p>
+<div class="codeblock" data-cid="c8"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">5 lines</span><button class="code-copy" type="button" data-target="c8">Copy</button></div><div class="code-scroll"><pre id="c8"><code>SELECT * FROM app.v_record_current WHERE id = :record_id;
+SELECT holder_position, full_name FROM app.record_joint_holder
+WHERE  record_id = :record_id ORDER BY holder_position;
+SELECT activity_type, occurred_at, remarks, details FROM app.record_activity
+WHERE  record_id = :record_id ORDER BY occurred_at DESC LIMIT 50;</code></pre></div></div>
+<p><strong>6. Range / date filtering — IEPF deadline pipeline (index #13):</strong></p>
+<div class="codeblock" data-cid="c9"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">6 lines</span><button class="code-copy" type="button" data-target="c9">Copy</button></div><div class="code-scroll"><pre id="c9"><code>SELECT company_id, count(*), sum(dividend_shares) AS shares_at_risk
+FROM   app.shareholder_record
+WHERE  deleted_at IS NULL
+  AND  proposed_iepf_transfer_date BETWEEN current_date AND current_date + 90
+  AND  status_code NOT IN ('CLAIMED','IEPF_FILED')
+GROUP  BY company_id;</code></pre></div></div>
+<p><strong>7. Tenant-level portfolio analytics (MV through the tenant view — no touch of the hot table):</strong></p>
+<div class="codeblock" data-cid="c10"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">4 lines</span><button class="code-copy" type="button" data-target="c10">Copy</button></div><div class="code-scroll"><pre id="c10"><code>SELECT company_name, record_count, claimed_count,
+       total_dividend_shares, share_price, total_market_value
+FROM   analytics.v_company_portfolio
+ORDER  BY total_market_value DESC;</code></pre></div></div>
+<p><strong>8. Geo distribution (MV) and a live status funnel (index #10):</strong></p>
+<div class="codeblock" data-cid="c11"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">7 lines</span><button class="code-copy" type="button" data-target="c11">Copy</button></div><div class="code-scroll"><pre id="c11"><code>SELECT s.name AS state, g.record_count, g.total_dividend_shares
+FROM   analytics.v_geo_distribution g
+JOIN   reference.state s ON s.id = g.state_id
+ORDER  BY g.record_count DESC LIMIT 20;
+
+SELECT status_code, count(*) FROM app.shareholder_record
+WHERE  deleted_at IS NULL GROUP BY status_code;</code></pre></div></div>
+<p><strong>9. Date-range analytics — activity volume (activity index):</strong></p>
+<div class="codeblock" data-cid="c12"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">5 lines</span><button class="code-copy" type="button" data-target="c12">Copy</button></div><div class="code-scroll"><pre id="c12"><code>SELECT date_trunc('week', occurred_at) AS week, count(*) AS calls
+FROM   app.record_activity
+WHERE  activity_type = 'call'
+  AND  occurred_at &gt;= now() - interval '90 days'
+GROUP  BY 1 ORDER BY 1;</code></pre></div></div>
+<p><strong>10. Optimistic-locking update + status transition (bumps row_version, writes audit diff, appends timeline):</strong></p>
+<div class="codeblock" data-cid="c13"><div class="code-bar"><span class="code-lang">SQL</span><span class="code-lines">10 lines</span><button class="code-copy" type="button" data-target="c13">Copy</button></div><div class="code-scroll"><pre id="c13"><code>UPDATE app.shareholder_record
+SET    status_code = 'UNDER_PROCESS',
+       status_changed_at = now(),
+       status_changed_by = app.current_user_id()
+WHERE  id = :record_id AND row_version = :expected_version;
+-- 0 rows updated =&gt; concurrent edit =&gt; HTTP 409
+
+INSERT INTO app.record_activity (tenant_id, record_id, activity_type, remarks, details, performed_by)
+VALUES (app.current_tenant_id(), :record_id, 'status_change', :remarks,
+        jsonb_build_object('old', :old_status, 'new', 'UNDER_PROCESS'), app.current_user_id());</code></pre></div></div>
+</section>
+<section id="sec-o" class="sec"><header class="sec-head"><span class="sec-letter">O</span><h2>Migration From Excel</h2></header>
+<p>The pipeline below is exactly what was executed against the sample workbook during validation (5,000/5,000 rows promoted, 0 reconciliation mismatches).</p>
+<ol><li><strong>Raw ingestion.</strong> Parse the workbook (headers on row 2 of <code>Sample Data</code>); create <code>app.import_batch</code> (file name, SHA-256, <code>prepared_on</code> from the constant column, dividend window parsed from the BI remark); <code>COPY</code> all columns <strong>as text</strong> into <code>staging.shareholder_record_raw</code> with <code>source_row_number</code>. The batch file-hash unique index makes a re-upload of the same file a no-op conflict → <strong>idempotent imports</strong>.</li><li><strong>Cleansing (SQL, in staging, auditable).</strong> <code>NULLIF(btrim(…),'')</code> everywhere; junk tokens (<code>0</code>, <code>#N/A</code>, <code>NA</code>, <code>Not available</code>) → NULL; sentinel pincode <code>999999</code> → NULL; O→0 repair in digit contexts (flagged, not silent); whitespace squash; label→code mapping for shares type / investment type / statuses.</li><li><strong>Validation.</strong> Template's "Compulsory" matrix enforced here: first name present, company resolvable, shares numeric ≥ 0, dates parseable, PAN format, folio-or-DP present. Failures set <code>is_valid=false</code> + <code>validation_errors jsonb</code> — <strong>rows are never dropped silently</strong>; the batch records <code>rejected_rows</code>.</li><li><strong>Reference mapping &amp; key generation.</strong> Company matched by alias table (handles "BPCL Ltd"); geo matched to <code>reference.*</code> (unmatched state/country → error entry); pincode → district/locality enrichment from <code>postal_index</code>; UUIDs minted on insert; legacy <code>Unique Code</code> carried into <code>record_code</code>.</li><li><strong>Deduplication.</strong> Within batch: <code>(company, upper(folio))</code> duplicates → keep first, reject rest with error. Against live data: <code>INSERT … ON CONFLICT</code> on the natural key — re-imports <strong>upsert</strong> rather than duplicate (or reject, per tenant configuration).</li><li><strong>Promotion</strong> in one transaction per batch: staging → <code>app.shareholder_record</code> (+ joint holders parsed from the JH columns), <code>target_record_id</code> written back to staging rows for lineage, batch counters updated, batch <code>status='loaded'</code>.</li><li><strong>Reconciliation.</strong> Post-load queries compare source vs loaded: row counts, share sums, and Excel's own <code>Market Value</code> vs the derived <code>v_record_valuation.market_value</code> (0 mismatches on the sample — the derivation is proven). Discrepancy report attaches to the batch.</li><li><strong>Derived-column policy:</strong> full names, totals, market values, folio/demat coalesce are <em>not</em> imported — the columns exist in staging only for reconciliation-diffing against what the database derives.</li></ol>
+<p>Recommended tooling: keep transforms in SQL (set-based, testable, in-database) driven by a thin orchestrator (Python/openpyxl for the Excel → CSV step); every step writes to the batch record so a failed import is diagnosable from the database alone.</p>
+</section>
+<section id="sec-p" class="sec"><header class="sec-head"><span class="sec-letter">P</span><h2>Scalability Roadmap</h2></header>
+<p><strong>Phase 1 — launch (≈ now → 10M records, tens of tenants).</strong> Single PostgreSQL 16 cluster (primary + streaming standby for HA); PgBouncer transaction pooling (RLS context is transaction-scoped by design); nightly base backups + WAL archiving (PITR); the schema as designed — no partitions, no external engines. Monitoring from day one: <code>pg_stat_statements</code>, index scan ratios, autovacuum lag, bloat, replication lag.</p>
+<p><strong>Phase 2 — growth (10M → ~100M records, hundreds of tenants).</strong> Read replica for reporting/exports and MV refresh offload where possible; autovacuum tuning per hot table (lower <code>autovacuum_vacuum_scale_factor</code> ~0.02, higher cost limits) — the soft-delete + audit pattern generates dead tuples, this is the known operational cost; quarterly index-usage review, <code>REINDEX CONCURRENTLY</code> for GIN bloat; monthly RANGE partitions for <code>audit.record_change</code> / <code>record_activity</code>; archival job moving old terminal records; valuation snapshot table if time-series dashboards are wanted; caching layer (Redis) only for genuinely hot reference reads (status labels, company lists) — the MVs already remove most repeated aggregation.</p>
+<p><strong>Phase 3 — large scale (100M+ records, or mega-tenants, or heavy search).</strong> HASH(tenant_id) partitioning of <code>shareholder_record</code> (constraints already partition-compatible); extraction of any regulated/giant tenant into a dedicated database (the <code>tenant_id</code>-everywhere design makes this a filtered dump); OpenSearch for fuzzy search sync'd by CDC (§G.2 thresholds); columnar warehouse via CDC for analytics (§H); object storage for source files with DB-held metadata (already implied by <code>source_file_name</code>/hash).</p>
+</section>
+<section id="sec-q" class="sec"><header class="sec-head"><span class="sec-letter">Q</span><h2>Risks and Trade-offs (explicit)</h2></header>
+<ol><li><strong>Market value derived, not stored.</strong> Trade-off: every valuation display costs a join to a 1-row-per-security price lookup (cheap, verified) and aggregate value queries go through the MV. Risk avoided: silently stale stored values. Residual risk: someone queries the MV between price load and refresh — mitigate by refreshing inside the price job's transaction boundary.</li><li><strong>Which shares × price?</strong> Spec says shareholder-shares; 5,000/5,000 sample rows say dividend-shares (47 rows would differ). The view exposes both; <strong>the business must confirm the authoritative formula.</strong> ➜ <em>Open question.</em></li><li><strong>Shared-schema tenancy.</strong> Trade-off: strongest-possible logical isolation but shared physical blast radius (noisy neighbor, one cluster's failure hits all). Mitigations: tenant-leading indexes, statement timeouts per role, Phase-3 extraction path. Rejected alternatives documented in §E.1.</li><li><strong>RLS performance tax.</strong> Each query gains a <code>tenant_id = f()</code> predicate — with tenant-leading indexes this is the <em>access path</em>, not overhead (verified plans). Risk: a future query pattern that can't lead with tenant_id (cross-tenant admin reports) — routed to the replica under <code>platform_admin</code> instead.</li><li><strong>Generated columns lock in derivation rules</strong> (full-name concat, total = sum of three buckets). If the business later wants manual overrides of full name, the column must become plain + trigger. Chosen anyway: verified-100% derivations should not be hand-editable.</li><li><strong>Soft delete + partial unique indexes</strong>: uniqueness applies to live rows only — a deleted folio can be re-imported (verified). Trade-off: duplicate <em>dead</em> rows can accumulate; acceptable, they're evidence.</li><li><strong><code>record_status</code> seeded with <code>NOT_STARTED</code></strong> <span class="chip chip-asm">assumption</span>: the template's dropdown has no initial state but a NOT NULL workflow needs one. Confirm the operational vocabulary (and whether "Others" needs a free-text companion field — currently <code>source_remarks</code>/activity notes cover it).</li><li><strong>One row per (company, folio) grain</strong> means the same human appears N times across companies (56 observed name+address duplicate pairs). Identity resolution (<code>investor_master</code>) is deferred until real match keys (PAN/Aadhaar/DOB) exist in data — premature merging is the worse failure mode. ➜ <em>Open question: is cross-company investor view a near-term product feature?</em></li><li><strong>Trigram + tsvector double indexing</strong> costs write amplification and storage on the biggest table. Justified by search being "a major workload"; the address trgm index is the first candidate to drop if <code>pg_stat_user_indexes</code> shows no scans.</li><li><strong>Aadhaar/PAN handling</strong> assumes an application-layer KMS exists. If not, PAN falls back to in-DB <code>pgcrypto</code> with key management discipline — weaker; flagged for the security review.</li><li><strong>Batch grain assumption</strong>: the sample file mixes 9 companies; the schema assumes real uploads are per company per file (batch → one company). If mixed files are the norm, <code>import_batch.company_id</code> becomes nullable and moves to the staging row — a 2-line migration, noted now.</li></ol>
+</section>
+<section id="sec-r" class="sec"><header class="sec-head"><span class="sec-letter">R</span><h2>Final Recommendation</h2></header>
+<p>Build <strong>Module 1 on a single PostgreSQL 16 cluster</strong> with the schema delivered here (and executed successfully end-to-end against the sample data): a <code>reference</code> schema for shared public facts (geography with a pincode directory for the mandated auto-fill, a securities master with weekly price history for the Saturday-night sync), an <code>app</code> schema whose core is <code>app.shareholder_record</code> at the (company, folio/demat) grain surrounded by <code>company</code>, <code>import_batch</code>, <code>record_joint_holder</code>, and an append-only <code>record_activity</code> timeline, a <code>staging</code> schema that takes every import as text and promotes only validated rows idempotently, an <code>audit</code> schema with a trigger-fed field-level diff log, and an <code>analytics</code> schema of concurrently-refreshed materialized views exposed through tenant-filtering views.</p>
+<p>The defining decisions: <strong>shared-schema multi-tenancy enforced three ways</strong> (forced RLS with fail-closed transaction context, composite tenant-aware foreign keys, tenant-leading uniques/indexes); <strong>derived values never stored</strong> (market values, concatenated names, totals — every one verified derivable against all 5,000 sample rows); <strong>lookup tables over enums</strong> for every business vocabulary; <strong>raw source preserved immutably beside cleansed, enriched columns</strong>; <strong>search served natively</strong> by trigram, full-text, and tenant-prefixed B-tree indexes with keyset pagination; <strong>soft delete with partial unique indexes</strong> on the core entity only; and <strong>no partitioning, no search engine, no warehouse yet</strong> — each with the concrete threshold that triggers its introduction written down (§G.2, §H, §J, §P).</p>
+<p>This is the smallest system that satisfies every requirement in the template — including the system-filled cleansing columns, the weekly price feed, the status workflow, and the compulsory-field matrix — while leaving each scaling door (partitioning, replica, OpenSearch, warehouse, tenant extraction) open behind a decision rule rather than a rewrite.</p>
+<p><strong>Questions for the business before build-out</strong> (each materially affects behavior, none blocks the schema): the authoritative market-value formula (Q2); the initial workflow status vocabulary (Q7); near-term need for cross-company investor identity (Q8); whether upload files are strictly per-company (Q11); expected per-tenant volumes to time Phase-2 work (§P).</p>
+</section>
+
+      <div class="foot">
+        <p>Every schema object in this document was executed against PostgreSQL&nbsp;16.13: the DDL ran
+        clean, all 5,000 sample rows loaded through the staging pipeline, tenant isolation was verified
+        with two tenants, and each search index was confirmed in a query plan. Facts marked
+        <span class="chip chip-obs">observed</span> were measured in the workbook; those marked
+        <span class="chip chip-asm">assumption</span> are stated design assumptions awaiting confirmation.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Copy buttons
+document.querySelectorAll('.code-copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var pre = document.getElementById(btn.dataset.target);
+    if (!pre) return;
+    var text = pre.innerText;
+    var done = function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { btn.textContent = 'Press Ctrl+C'; });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { btn.textContent = 'Press Ctrl+C'; }
+      document.body.removeChild(ta);
+    }
+  });
+});
+
+// Expand tall code blocks
+document.querySelectorAll('.code-expand').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var block = btn.closest('.codeblock');
+    var open = block.classList.toggle('open');
+    btn.textContent = open ? 'Collapse' : 'Show all ' + block.querySelector('.code-lines').textContent.replace(' lines', '') + ' lines';
+    if (!open) block.scrollIntoView({ block: 'nearest' });
+  });
+});
+
+// Scrollspy
+(function () {
+  var items = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
+  var secs = items.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  function mark(i) {
+    items.forEach(function (a, j) { a.classList.toggle('active', i === j); });
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) mark(secs.indexOf(e.target));
+    });
+  }, { rootMargin: '-15% 0px -75% 0px' });
+  secs.forEach(function (s) { if (s) io.observe(s); });
+})();
+</script>
